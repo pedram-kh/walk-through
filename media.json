@@ -1,0 +1,565 @@
+{
+  "site": "https://www.catalyst-growth.com/",
+  "generated": "2026-10-01",
+  "images": [
+    {
+      "file": "images/hero.jpg",
+      "type": "image",
+      "tile": "hero",
+      "width": 1018,
+      "height": 1400,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a26af375476142e24afd095_ZAVA_MOCK%201.avif",
+      "source_size": [
+        1418,
+        1460
+      ],
+      "found_on": [
+        "home"
+      ],
+      "tile_size": [
+        2.4,
+        3.3
+      ],
+      "tile_kind": "photo"
+    },
+    {
+      "file": "images/portrait.jpg",
+      "type": "image",
+      "tile": "portrait",
+      "width": 1400,
+      "height": 1062,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a24359bfd54d61430ab387d_delta_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ],
+      "tile_size": [
+        2.9,
+        2.2
+      ],
+      "tile_kind": "photo"
+    },
+    {
+      "file": "images/texture.jpg",
+      "type": "image",
+      "tile": "texture",
+      "width": 1400,
+      "height": 1190,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a215c9823cc434ebbb46413_wild-cover-image%402x.avif",
+      "source_size": [
+        3200,
+        2000
+      ],
+      "found_on": [
+        "work"
+      ],
+      "tile_size": [
+        2.0,
+        1.7
+      ],
+      "tile_kind": "photo"
+    },
+    {
+      "file": "images/landscape.jpg",
+      "type": "image",
+      "tile": "landscape",
+      "width": 1400,
+      "height": 653,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a24358b2c253b9e5ef9822c_tenzing_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ],
+      "tile_size": [
+        3.0,
+        1.4
+      ],
+      "tile_kind": "photo"
+    },
+    {
+      "file": "images/statement.jpg",
+      "type": "image",
+      "tile": "statement",
+      "width": 1188,
+      "height": 1080,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a2435b008092d82f166eaba_perplexity_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ],
+      "tile_size": [
+        2.2,
+        2.0
+      ],
+      "tile_kind": "photo"
+    },
+    {
+      "file": "images/card.jpg",
+      "type": "image",
+      "tile": "card",
+      "width": 1400,
+      "height": 700,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a2435bedce540a251f26ff2_yonder_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ],
+      "tile_size": [
+        2.2,
+        1.1
+      ],
+      "tile_kind": "photo"
+    },
+    {
+      "file": "images/product.jpg",
+      "type": "image",
+      "tile": "product",
+      "width": 1400,
+      "height": 933,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a21618bd6568a4377b1c46e_uklash-cover%402x.avif",
+      "source_size": [
+        3200,
+        2000
+      ],
+      "found_on": [
+        "work"
+      ],
+      "tile_size": [
+        1.8,
+        1.2
+      ],
+      "tile_kind": "photo"
+    },
+    {
+      "file": "images/splash.jpg",
+      "type": "image",
+      "tile": "splash",
+      "width": 1400,
+      "height": 1023,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a2435a8096ce423acf92efb_bolt_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ],
+      "tile_size": [
+        1.3,
+        0.95
+      ],
+      "tile_kind": "photo"
+    },
+    {
+      "file": "images/ugc.jpg",
+      "type": "image",
+      "tile": "ugc",
+      "tile_kind": "galaxy",
+      "tint": "violet",
+      "grayscale": true,
+      "ai_related": true,
+      "tile_size": [
+        1.9,
+        1.9
+      ],
+      "width": 1080,
+      "height": 1080,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a2435eb9401d162eb499cf7_cleo_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ]
+    },
+    {
+      "file": "images/far_left.jpg",
+      "type": "image",
+      "tile": "far_left",
+      "tile_kind": "galaxy",
+      "tint": "violet",
+      "grayscale": true,
+      "ai_related": true,
+      "tile_size": [
+        3.5,
+        1.1
+      ],
+      "width": 1000,
+      "height": 314,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a19859061facbefc510bf7f_menu-visual-001%402x.avif",
+      "source_size": [
+        1000,
+        600
+      ],
+      "found_on": [
+        "home"
+      ]
+    },
+    {
+      "file": "images/behind_hero.jpg",
+      "type": "image",
+      "tile": "behind_hero",
+      "tile_kind": "galaxy",
+      "tint": "blue",
+      "grayscale": true,
+      "ai_related": false,
+      "tile_size": [
+        4.2,
+        2.0
+      ],
+      "width": 1400,
+      "height": 666,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a243594ce0f59637d1b30d9_rise_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ]
+    },
+    {
+      "file": "images/top_violet.jpg",
+      "type": "image",
+      "tile": "top_violet",
+      "tile_kind": "galaxy",
+      "tint": "violet",
+      "grayscale": true,
+      "ai_related": true,
+      "tile_size": [
+        2.0,
+        1.6
+      ],
+      "width": 750,
+      "height": 600,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a19857ee91ceb202c4c65fb_menu-visual-002%402x.avif",
+      "source_size": [
+        1000,
+        600
+      ],
+      "found_on": [
+        "home"
+      ]
+    },
+    {
+      "file": "images/top_teal.jpg",
+      "type": "image",
+      "tile": "top_teal",
+      "tile_kind": "galaxy",
+      "tint": "teal",
+      "grayscale": true,
+      "ai_related": true,
+      "tile_size": [
+        3.6,
+        1.5
+      ],
+      "width": 1400,
+      "height": 583,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a2435b008092d82f166eaba_perplexity_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ]
+    },
+    {
+      "file": "images/right_blue.jpg",
+      "type": "image",
+      "tile": "right_blue",
+      "tile_kind": "galaxy",
+      "tint": "blue",
+      "grayscale": true,
+      "ai_related": true,
+      "tile_size": [
+        1.7,
+        0.9
+      ],
+      "width": 1400,
+      "height": 741,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a2435b55fb5517249d68c72_granola_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ]
+    },
+    {
+      "file": "images/side_strip.jpg",
+      "type": "image",
+      "tile": "side_strip",
+      "tile_kind": "galaxy",
+      "tint": "blue",
+      "grayscale": true,
+      "ai_related": false,
+      "tile_size": [
+        1.2,
+        2.0
+      ],
+      "width": 840,
+      "height": 1400,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a216d05de0402717058621c_visual-runna%402x.avif",
+      "source_size": [
+        1920,
+        1920
+      ],
+      "found_on": [
+        "home"
+      ]
+    },
+    {
+      "file": "images/mid_violet.jpg",
+      "type": "image",
+      "tile": "mid_violet",
+      "tile_kind": "galaxy",
+      "tint": "violet",
+      "grayscale": true,
+      "ai_related": false,
+      "tile_size": [
+        1.8,
+        0.8
+      ],
+      "width": 1400,
+      "height": 622,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a2435c645841096e8684734_canva_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ]
+    },
+    {
+      "file": "images/right_teal.jpg",
+      "type": "image",
+      "tile": "right_teal",
+      "tile_kind": "galaxy",
+      "tint": "teal",
+      "grayscale": true,
+      "ai_related": true,
+      "tile_size": [
+        1.8,
+        1.8
+      ],
+      "width": 1400,
+      "height": 1400,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a216d110a5fe018f791d442_visual-granola%402x.avif",
+      "source_size": [
+        1920,
+        1920
+      ],
+      "found_on": [
+        "home"
+      ]
+    },
+    {
+      "file": "images/floor_teal.jpg",
+      "type": "image",
+      "tile": "floor_teal",
+      "tile_kind": "galaxy",
+      "tint": "teal",
+      "grayscale": true,
+      "ai_related": false,
+      "tile_size": [
+        3.0,
+        0.9
+      ],
+      "width": 1400,
+      "height": 420,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a2436132ac8266de499b00f_huel_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ]
+    },
+    {
+      "file": "images/floor_streak.jpg",
+      "type": "image",
+      "tile": "floor_streak",
+      "tile_kind": "galaxy",
+      "tint": "blue",
+      "grayscale": true,
+      "ai_related": false,
+      "tile_size": [
+        3.8,
+        0.75
+      ],
+      "width": 1400,
+      "height": 276,
+      "source_url": "https://cdn.prod.website-files.com/6a1607edd23cd31d45555952/6a2435e1fdbf5bd9fb030ec8_skin_cover.avif",
+      "source_size": [
+        1920,
+        1080
+      ],
+      "found_on": [
+        "work"
+      ]
+    }
+  ],
+  "videos": [
+    {
+      "file": "videos/hero.mp4",
+      "type": "video",
+      "tile": "hero",
+      "tile_size": [
+        2.4,
+        3.3
+      ],
+      "width": 720,
+      "height": 990,
+      "source_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/video.m3u8",
+      "source_variant_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/stream_t8618535bc852beccd5b30c38d29eb1bd_r1706729901.m3u8",
+      "found_on": [
+        "home"
+      ],
+      "source_size": [
+        1920,
+        1080
+      ],
+      "start_s": 57.6,
+      "duration_s": 6.8,
+      "fps": 30,
+      "codec": "h264",
+      "audio": false,
+      "faststart": true,
+      "poster": "videos/hero-poster.jpg"
+    },
+    {
+      "file": "videos/hero-poster.jpg",
+      "type": "poster",
+      "tile": "hero",
+      "tile_size": [
+        2.4,
+        3.3
+      ],
+      "width": 720,
+      "height": 990,
+      "source_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/video.m3u8",
+      "source_variant_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/stream_t8618535bc852beccd5b30c38d29eb1bd_r1706729901.m3u8",
+      "found_on": [
+        "home"
+      ],
+      "source_size": [
+        1920,
+        1080
+      ],
+      "frame_of": "videos/hero.mp4"
+    },
+    {
+      "file": "videos/portrait.mp4",
+      "type": "video",
+      "tile": "portrait",
+      "tile_size": [
+        2.9,
+        2.2
+      ],
+      "width": 712,
+      "height": 540,
+      "source_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/video.m3u8",
+      "source_variant_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/stream_t8618535bc852beccd5b30c38d29eb1bd_r1706729901.m3u8",
+      "found_on": [
+        "home"
+      ],
+      "source_size": [
+        1920,
+        1080
+      ],
+      "start_s": 25.9,
+      "duration_s": 7.0,
+      "fps": 30,
+      "codec": "h264",
+      "audio": false,
+      "faststart": true,
+      "poster": "videos/portrait-poster.jpg"
+    },
+    {
+      "file": "videos/portrait-poster.jpg",
+      "type": "poster",
+      "tile": "portrait",
+      "tile_size": [
+        2.9,
+        2.2
+      ],
+      "width": 712,
+      "height": 540,
+      "source_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/video.m3u8",
+      "source_variant_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/stream_t8618535bc852beccd5b30c38d29eb1bd_r1706729901.m3u8",
+      "found_on": [
+        "home"
+      ],
+      "source_size": [
+        1920,
+        1080
+      ],
+      "frame_of": "videos/portrait.mp4"
+    },
+    {
+      "file": "videos/product.mp4",
+      "type": "video",
+      "tile": "product",
+      "tile_size": [
+        1.8,
+        1.2
+      ],
+      "width": 810,
+      "height": 540,
+      "source_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/video.m3u8",
+      "source_variant_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/stream_t8618535bc852beccd5b30c38d29eb1bd_r1706729901.m3u8",
+      "found_on": [
+        "home"
+      ],
+      "source_size": [
+        1920,
+        1080
+      ],
+      "start_s": 39.85,
+      "duration_s": 7.0,
+      "fps": 30,
+      "codec": "h264",
+      "audio": false,
+      "faststart": true,
+      "poster": "videos/product-poster.jpg"
+    },
+    {
+      "file": "videos/product-poster.jpg",
+      "type": "poster",
+      "tile": "product",
+      "tile_size": [
+        1.8,
+        1.2
+      ],
+      "width": 810,
+      "height": 540,
+      "source_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/video.m3u8",
+      "source_variant_url": "https://customer-rxgejsckjlu1awsq.cloudflarestream.com/755dcf789e8a40ccad39aa8473af2b64/manifest/stream_t8618535bc852beccd5b30c38d29eb1bd_r1706729901.m3u8",
+      "found_on": [
+        "home"
+      ],
+      "source_size": [
+        1920,
+        1080
+      ],
+      "frame_of": "videos/product.mp4"
+    }
+  ]
+}
