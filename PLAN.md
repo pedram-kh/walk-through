@@ -200,10 +200,17 @@ in the world, so stops never overlap.
    becomes global; the tile captions stay with the stop.
 5. Files move into `stops/01-hero/`; `build_layout.py` becomes `build.py`,
    writes there, and uses shared helpers from `tools/`. `media.json` paths update.
-6. Budgets (see review notes): reduce stop 1 to the per-stop limits or record
-   an agreed exception.
+6. Budgets: stop 1 keeps its three videos and its size (agreed exceptions).
 7. Fallback: `app.js` keeps its checks; the fallback becomes the flat page with
    each stop's poster.
+
+## Jump navigation (decided 2026-10-03)
+
+- Progress dots, vertical, on the left side of the screen, one per stop.
+- Owned by the runtime (page level, like the nav bar).
+- Still open: what a click does (fly quickly through the stops in between, or
+  cut to the stop with a short fade); whether dots show section names on hover;
+  dot placement against the left-hand copy and the "Strategy / Production" list.
 
 ## Rule 1: performance (one shared budget)
 
@@ -213,6 +220,7 @@ in the world, so stops never overlap.
   and next stops are visible but frozen. All others are hidden and cost nothing.
 - Per stop: at most 60,000 triangles, 40 draw calls and one playing video.
   Pixel ratio capped at 1.5. Tell you before exceeding a budget.
+- Agreed exception: stop 01 plays three videos (Motion, centre, UGC).
 - After every stop, measure fps resting at it and travelling in and out, and
   log it below with the date. If the route drops below 30 fps, fix that before
   starting a new stop.
@@ -229,6 +237,7 @@ in the world, so stops never overlap.
 - If a stop is not ready when the camera arrives, show its poster on a plane
   and swap in the live version when loaded. Never freeze the scroll.
 - Keep each stop under 2 MB excluding video. Log each stop's size below.
+- Agreed exception: stop 01 stays at its current size (~6.1 MB excluding video).
 
 ## Fallback
 
@@ -246,12 +255,6 @@ in the world, so stops never overlap.
 
 ## Review notes and open items
 
-- Stop 1 plays three videos (Motion, centre, UGC); the budget allows one. Decide:
-  exception for stop 1, or two of those tiles show posters only.
-- Stop 1 is about 6.1 MB excluding video (images 2.75 MB, poster 1.5 MB,
-  flow.bin 1.2 MB, dust.bin 0.6 MB); the budget is 2 MB. Plan: WebP images at
-  tile size, a compressed poster, half-precision particle data. Or an agreed
-  exception.
 - Stop 1 fps has not been measured on the Iris Plus since the particle current
   was added (27,000 points). First `?bench` run will tell.
 - Phase A to B is "the very first scroll movement". If the visitor stops between
@@ -259,10 +262,10 @@ in the world, so stops never overlap.
   Optional: snap to the nearest rest position when scrolling stops (not decided).
 - Stop 02 needs logo artwork for all ten brands (SVG preferred) and the
   reference page's grid and typography; to be asked when stop 02 starts.
-- Jump navigation between stops: not decided (asked 2026-10-03).
 
 ## Log
 
 | Date | Stop | Event | Rest fps | Travel fps | Size (excl. video) |
 |---|---|---|---|---|---|
 | 2026-10-03 | 01 | Hero approved as a scene; first commit pushed | not measured | n/a | 6.1 MB |
+| 2026-10-03 | 01 | Exceptions agreed: three videos, size above 2 MB | | | |
