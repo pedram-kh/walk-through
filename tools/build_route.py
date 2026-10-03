@@ -18,7 +18,8 @@ so the path never passes through a tile.
 Journey currents: the particle current continues from stop to stop. Each segment
 gets a current that picks up the previous stop's current where its main path
 leaves the frame, runs a little ahead of the camera through the journey, and
-fades out at the next stop (written to currents/tNN.bin, described in route.json).
+hands over to the next stop's own current where it begins (or fades out near the
+next stop if it has none). Written to currents/tNN.bin, described in route.json.
 """
 import bpy, json, math, random, struct, sys
 from pathlib import Path
@@ -28,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from flow_common import make_current
 
 ROOT = Path(__file__).resolve().parent.parent
-STOPS = ['01-hero', '02-placeholder']      # route order
+STOPS = ['01-hero', '02-clients']          # route order
 SAMPLES = 120                              # camera samples per segment
 SPACER_SCREENS = 3.0                       # scroll length of each journey, in screen heights
 MIN_CLEARANCE = 0.8                        # closest the camera may pass to any object (tiles lift ~0.3 on hover)
@@ -38,7 +39,7 @@ JOURNEY = {
     'ahead': 6.0,             # runs this far in front of the camera through the journey
     'offset': (0.7, -0.9),    # ...and this far right and below the centre of view, clear of the lens
     'times': (0.42, 0.55, 0.68, 0.8, 0.9),   # journey points it passes in front of the camera
-    'end': (1.6, -1.4, -7.0), # fades out here, in the next stop's camera frame
+    'end': (1.6, -1.4, -7.0), # if the next stop has no current: fade out here, in its camera frame
     'density': 300,           # particles per unit of length
     'width': 0.196, 'fibres': 34, 'speed': 0.48, 'twist': 9.0, 'samples': 200,
     'color': ('#a4a4aa', '#e2e2e6'), 'radius': 0.0055,
@@ -104,17 +105,28 @@ def sample_at(positions, rotations, t):
     return positions[i].lerp(positions[i + 1], f - i), rotations[i].slerp(rotations[i + 1], f - i)
 
 
-def journey_current(index, from_stop, positions, rotations):
-    """Current for segment `index`, continuing from_stop's main current along the journey."""
-    contract = json.loads((ROOT / 'stops' / from_stop['id'] / 'stop.json').read_text())
-    origin, turn = Vector(from_stop['origin']), quat(from_stop['quaternion'])
-    tail = [origin + turn @ Vector(v) for v in contract['flow']['paths'][0]['points']]
+def stop_current(stop):
+    """A stop's main current path in world axes, or None."""
+    contract = json.loads((ROOT / 'stops' / stop['id'] / 'stop.json').read_text())
+    if 'flow' not in contract:
+        return None
+    origin, turn = Vector(stop['origin']), quat(stop['quaternion'])
+    return [origin + turn @ Vector(v) for v in contract['flow']['paths'][0]['points']]
+
+
+def journey_current(index, from_stop, to_stop, positions, rotations):
+    """Current for segment `index`: from from_stop's main current to to_stop's."""
+    tail = stop_current(from_stop)
     control = [tail[int(0.92 * (len(tail) - 1))], tail[-1]]      # overlap the tail so the hand-over is seamless
     dx, dy = JOURNEY['offset']
     for t in JOURNEY['times']:
         p, r = sample_at(positions, rotations, t)
         control.append(p + r @ Vector((dx, dy, -JOURNEY['ahead'])))
-    control.append(positions[-1] + rotations[-1] @ Vector(JOURNEY['end']))
+    head = stop_current(to_stop)
+    if head:                                                    # overlap the next stop's current
+        control += [head[0], head[int(0.08 * (len(head) - 1))]]
+    else:
+        control.append(positions[-1] + rotations[-1] @ Vector(JOURNEY['end']))
     rough = sum((b - a).length for a, b in zip(control, control[1:]))
     random.seed(SEED + index)
     paths, rows, _ = make_current(
@@ -187,7 +199,7 @@ def in_view(p, r, w):
     v = r.inverted() @ (w - p)
     return v.z < -0.3 and abs(v.x / -v.z) < tan_h and abs(v.y / -v.z) < tan_v
 for k, (seg, (positions, rotations)) in enumerate(zip(route['segments'], raw_segments)):
-    seg['current'], line = journey_current(k, route['stops'][k], positions, rotations)
+    seg['current'], line = journey_current(k, route['stops'][k], route['stops'][k + 1], positions, rotations)
     rest_seen = sum(in_view(positions[0], rotations[0], w) for w in line) / len(line)
     report = []
     for t in (0.3, 0.4, 0.5, 0.6, 0.7):

@@ -136,7 +136,7 @@ runtime/
   bench.js              ?bench: drives the route and prints fps per stop and phase
 stops/
   01-hero/              build.py, stop.js, stop.json, stop.glb, dust.bin, flow.bin, stop.blend, poster.jpg, media/
-  02-placeholder/       graybox for testing the route (build.py, stop.js, stop.json, stop.glb, poster.jpg)
+  02-clients/           "Creative for" logo grid: build.py, stop.js, stop.json, stop.glb, dust.bin, flow.bin, stop.blend, poster.jpg
 tools/
   build_route.py        Blender script: chains the stops (half circle, tilt, travel) -> route.json, journey
                         currents -> currents/tNN.bin, camera clearance check
@@ -283,3 +283,4 @@ in the world, so stops never overlap.
 | 2026-10-03 | 01 to 02 | Transition move: half circle (radius 8) swinging toward the objects while tilting 90 degrees, then travel 14; clearance check in build_route.py (closest pass 4.4 units) | not measured | not measured | |
 | 2026-10-03 | 01 to 02 | Tilt 60 degrees, travel 8; current continues through the journey (stop 01 tail rerouted, currents/t01.bin, 10,441 particles); ~56k points on screen during the journey | not measured (run ?bench) | not measured | journey current 0.45 MB |
 | 2026-10-03 | 01 to 02 | Frame rate judged OK by eye on the test Mac; no ?bench numbers yet | OK (by eye) | OK (by eye) | |
+| 2026-10-04 | 02 | Brief recorded in stop.json; graybox approved (5 x 2 grid at varied depths, current threads the middle line and leaves left, journey current hands over to it) | not measured | not measured | 0.7 MB (graybox) |

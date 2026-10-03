@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GREY_GLSL, addGrey } from '../../runtime/materials.js';
-import { POINTER_PUSH, POINT_FRAGMENT, createCurrent } from '../../runtime/flow.js';
+import { DUST_VERTEX, POINT_FRAGMENT, createCurrent } from '../../runtime/flow.js';
 
 const CONFIG = {
   // Real photos: tile label -> image URL (relative to this stop's folder).
@@ -63,23 +63,6 @@ void main() {
   gl_FragColor = vec4(toGrey(col), 1.0);
   #include <colorspace_fragment>
 }`;
-
-const DUST_VERTEX = /* glsl */`
-attribute vec3 aColor; attribute float aSize; attribute float aSeed;
-${POINTER_PUSH}
-void main() {
-  vec4 world = modelMatrix * vec4(position, 1.0);
-  world.xyz += vec3(sin(uTime * 0.35 + aSeed * 40.0), cos(uTime * 0.28 + aSeed * 71.0), sin(uTime * 0.22 + aSeed * 13.0)) * uDrift;
-  vec4 near = pushFrom(world.xyz, uRayO, uRayD);
-  vec4 trail = pushFrom(world.xyz, uTrailO, uTrailD);
-  world.xyz += (near.xyz + trail.xyz * uTrail) * uActive * (0.6 + aSeed * 0.8);
-  vec4 view = viewMatrix * world;
-  gl_Position = projectionMatrix * view;
-  gl_PointSize = max(1.6, aSize * 2.0 * uSizeBoost * uScale / -view.z);
-  float twinkle = 0.72 + 0.28 * sin(uTime * (0.8 + aSeed * 2.0) + aSeed * 50.0);
-  vColor = aColor * twinkle * (1.0 + near.w * uActive * 1.4);
-}`;
-
 // ctx (from the runtime): dir, camera, overlay (element for HTML captions), pointer
 // ({ x, y } in normalised device coordinates, inside), invalidate() to request a render.
 export async function load(ctx) {

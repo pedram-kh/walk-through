@@ -25,6 +25,23 @@ void main() {
   #include <colorspace_fragment>
 }`;
 
+// Dust: points that drift and twinkle; aColor, aSize, aSeed per point.
+export const DUST_VERTEX = /* glsl */`
+attribute vec3 aColor; attribute float aSize; attribute float aSeed;
+${POINTER_PUSH}
+void main() {
+  vec4 world = modelMatrix * vec4(position, 1.0);
+  world.xyz += vec3(sin(uTime * 0.35 + aSeed * 40.0), cos(uTime * 0.28 + aSeed * 71.0), sin(uTime * 0.22 + aSeed * 13.0)) * uDrift;
+  vec4 near = pushFrom(world.xyz, uRayO, uRayD);
+  vec4 trail = pushFrom(world.xyz, uTrailO, uTrailD);
+  world.xyz += (near.xyz + trail.xyz * uTrail) * uActive * (0.6 + aSeed * 0.8);
+  vec4 view = viewMatrix * world;
+  gl_Position = projectionMatrix * view;
+  gl_PointSize = max(1.6, aSize * 2.0 * uSizeBoost * uScale / -view.z);
+  float twinkle = 0.72 + 0.28 * sin(uTime * (0.8 + aSeed * 2.0) + aSeed * 50.0);
+  vColor = aColor * twinkle * (1.0 + near.w * uActive * 1.4);
+}`;
+
 // Paths arrive as a texture: per path, rows of points, normals, binormals.
 const FLOW_VERTEX = /* glsl */`
 attribute vec3 aColor; attribute float aSize; attribute float aSeed;
