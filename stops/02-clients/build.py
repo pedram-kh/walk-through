@@ -1,13 +1,15 @@
-"""Stop 02, clients ("Creative for" logo grid) - graybox pass (Blender 4.5 LTS, CPU render).
+"""Stop 02, clients ("Creative for" logo grid) - detail pass (Blender 4.5 LTS, CPU render).
 
-Graybox: the 5 x 2 grid of cells floating at slightly different depths, brand
-names in Blender's default font (real fonts come in the detail pass), the stop's
-current threading the grid lines, and a light dust field.
+The 5 x 2 grid of cells floating at slightly different depths (approved graybox),
+wordmarks set in each brand's typeface like the landing HTML (fonts/), the stop's
+current threading the grid lines, and a light dust field. Cells, hairlines and
+wordmarks are each merged into one mesh with a per-vertex cell number (_CELL), so
+the browser draws the grid in three calls and lifts and lights one cell at a time.
 Run:
   /Applications/Blender.app/Contents/MacOS/Blender --background --python stops/02-clients/build.py
 Outputs beside this file:
   poster.jpg, stop.blend     preview render (also the fallback poster) and editable scene
-  stop.glb                   cells, hairline outlines and wordmarks (names, rest transforms)
+  stop.glb                   Cells, Lines, Words: three merged meshes with UVs and a _CELL attribute
   dust.bin                   dust points: x y z r g b size owner (float32 x 8, owner -1 = free)
   flow.bin                   current particles (float32 x 11, see tools/flow_common.py)
   stop.json                  contract: rest camera, how the route enters, brief, cells, dust, flow
@@ -65,7 +67,23 @@ DEPTH_OFFSETS = [            # each cell floats this much further (+) or nearer 
     [0.5, -0.3, 0.7, -0.5, 0.2],
 ]
 HAIRLINE = 0.012             # outline width at REST_DEPTH, scene units
-WORD_SIZE = 0.30             # wordmark size as a share of the cell height
+# Wordmarks, from the landing HTML (font, px size in a 137 px tall cell, letter spacing px, case).
+# The three new brands use the fonts agreed in the brief. The fonts/ files are Google Fonts
+# static instances with overlapping outlines removed (fontTools), so Blender fills them cleanly.
+WORDMARKS = {
+    'Lovable':     ('Outfit-600.ttf', 34, -1.02, None),
+    'fyxer':       ('SpaceGrotesk-500.ttf', 36, -1.44, 'lower'),
+    'MAGIC AI':    ('Syne-700.ttf', 26, 1.04, 'upper'),
+    'Mozart':      ('DMSerifDisplay-400.ttf', 38, -0.38, None),
+    'cleo':        ('Nunito-800.ttf', 38, -1.14, 'lower'),
+    'VIKTOR':      ('Archivo-700.ttf', 28, 3.36, 'upper'),
+    'Jack & Jill': ('InstrumentSerif-Italic.ttf', 38, -0.38, None),
+    'perplexity':  ('InterTight-500.ttf', 34, -0.68, 'lower'),
+    'Granola':     ('Fraunces-500.ttf', 36, -0.72, None),
+    'Canva':       ('Pacifico-400.ttf', 40, 0.0, None),       # Pacifico's letters run small for their size
+}
+CELL_PX = 137                # cell height in the landing HTML, for the px sizes above
+EM_ADVANCE = 0.55            # average glyph advance in em, to turn letter spacing into Blender's spacing scale
 
 # ---- Current: control points (x, y in the frame, depth). Enters where the journey
 # current from stop 01 ends (lower right, near), runs along the line between the two
@@ -87,7 +105,7 @@ DUST = {'count': 2600, 'radius': 0.0055, 'color': ('#9a9aa0', '#d0d0d4')}
 
 CELL_COLOR = (0.006, 0.006, 0.008)
 LINE_COLOR = (0.07, 0.07, 0.075)
-WORD_COLOR = (0.45, 0.45, 0.46)
+WORD_COLOR = (0.48, 0.48, 0.48)     # white at 72%, like the landing HTML (linear)
 
 
 def hex_rgb(h):
@@ -171,16 +189,19 @@ for row, names in enumerate(BRANDS):
         for side, (ow, oh, dx, dz) in {'T': (w, t, 0, (h - t) / 2), 'B': (w, t, 0, -(h - t) / 2),
                                        'L': (t, h, -(w - t) / 2, 0), 'R': (t, h, (w - t) / 2, 0)}.items():
             objects.append(plane(f'Line_{row}{col}{side}', ow, oh, centre + Vector((dx, -0.004, dz)), line_mat))
+        font, px, spacing, case = WORDMARKS[brand]
         bpy.ops.object.text_add(location=centre + Vector((0, -0.01, 0)), rotation=(math.radians(90), 0, 0))
         word = bpy.context.active_object
-        word.data.body = brand
-        word.data.size = WORD_SIZE * h
+        word.data.body = brand.lower() if case == 'lower' else brand.upper() if case == 'upper' else brand
+        word.data.font = bpy.data.fonts.load(str(OUT / 'fonts' / font), check_existing=True)
+        word.data.size = px / CELL_PX * h
+        word.data.space_character = 1 + spacing / px / EM_ADVANCE
         word.data.align_x, word.data.align_y = 'CENTER', 'CENTER'
         word.data.materials.append(word_mat)
         bpy.ops.object.convert(target='MESH')
         word.name = f'Word_{row}{col}'
         objects.append(word)
-        cells.append({'name': name, 'word': word.name, 'brand': brand, 'row': row, 'col': col,
+        cells.append({'name': name, 'word': word.name, 'brand': brand, 'row': row, 'col': col, 'centre': y_up(centre),
                       'depth': round(depth, 3), 'width': round(w, 4), 'height': round(h, 4)})
 
 # ---- Dust: a light free field around the grid ----------------------------------
@@ -245,12 +266,30 @@ scene.render.filepath = str(OUT / 'poster.jpg')
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT / 'stop.blend'))
 bpy.ops.render.render(write_still=True)
 
-# ---- Browser export ---------------------------------------------------------------
+# ---- Browser export: three merged meshes, each vertex tagged with its cell ---------
+def merge(prefix):
+    parts = [ob for ob in scene.objects if ob.type == 'MESH' and ob.name.startswith(prefix + '_')]
+    for ob in parts:
+        index = 5 * int(ob.name[len(prefix) + 1]) + int(ob.name[len(prefix) + 2])     # row * 5 + col
+        attr = ob.data.attributes.new('_CELL', 'FLOAT', 'POINT')
+        attr.data.foreach_set('value', [float(index)] * len(ob.data.vertices))
+    bpy.ops.object.select_all(action='DESELECT')
+    for ob in parts:
+        ob.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    bpy.ops.object.join()
+    merged = bpy.context.active_object
+    merged.name = {'Cell': 'Cells', 'Line': 'Lines', 'Word': 'Words'}[prefix]
+    return merged
+
+
+merged = [merge(prefix) for prefix in ('Cell', 'Line', 'Word')]
 bpy.ops.object.select_all(action='DESELECT')
-for ob in objects:
+for ob in merged:
     ob.select_set(True)
+bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)   # vertices in the stop's own frame
 bpy.ops.export_scene.gltf(filepath=str(OUT / 'stop.glb'), export_format='GLB', use_selection=True,
-                          export_materials='NONE', export_animations=False)
+                          export_materials='NONE', export_animations=False, export_attributes=True)
 with open(OUT / 'dust.bin', 'wb') as f:
     for row in dust_rows:
         f.write(struct.pack('<8f', *row))

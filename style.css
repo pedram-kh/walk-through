@@ -105,4 +105,7 @@ html:not(.route) .s-clients { background-image: none; }     /* the list is the g
   .lede p br { display: none; }
   .s-hero::before { background: linear-gradient(180deg, #020204d9 0%, #02020499 55%, #02020400 85%); }
   .pillars { display: none; }
+  .s-clients .eyebrow { left: 16px; top: 22%; }
+  html:not(.route) .brand-list { left: 16px; right: 16px; top: calc(22% + 32px); grid-template-columns: repeat(2, 1fr); font-size: 17px; }
+  html:not(.route) .brand-list li { padding: 18px 8px; }
 }
