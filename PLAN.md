@@ -282,3 +282,4 @@ in the world, so stops never overlap.
 | 2026-10-03 | 01 to 02 | Route skeleton: hero as stop 01, placeholder stop 02, curtain, freeze and grey, curl and 90-degree tilt down, travel, dots, flat fallback | not measured (run ?bench) | not measured | 01: 6.1 MB, 02: 0.1 MB |
 | 2026-10-03 | 01 to 02 | Transition move: half circle (radius 8) swinging toward the objects while tilting 90 degrees, then travel 14; clearance check in build_route.py (closest pass 4.4 units) | not measured | not measured | |
 | 2026-10-03 | 01 to 02 | Tilt 60 degrees, travel 8; current continues through the journey (stop 01 tail rerouted, currents/t01.bin, 10,441 particles); ~56k points on screen during the journey | not measured (run ?bench) | not measured | journey current 0.45 MB |
+| 2026-10-03 | 01 to 02 | Frame rate judged OK by eye on the test Mac; no ?bench numbers yet | OK (by eye) | OK (by eye) | |
