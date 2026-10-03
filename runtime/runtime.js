@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { Route } from './route.js';
 import { StopLoader } from './loader.js';
 import { mountDots } from './dots.js';
+import { createCurrent, stillPointerUniforms } from './flow.js';
 
 const MAX_PIXEL_RATIO = 1.5;
 const GREY_SECONDS = 0.5;          // colour <-> black and white fade
@@ -47,6 +48,25 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
   });
   const dots = mountDots(route);
 
+  // Journey currents (one per segment): carry the particle current from stop to stop.
+  // Shown while either of their stops is in view; flowing only while one of them is live.
+  const journeys = routeData.segments.map((segment, k) => ({ k, data: segment.current, time: { value: 0 }, current: null }));
+  async function loadJourneys() {
+    for (const journey of journeys) {
+      if (!journey.data || disposed) continue;
+      try {
+        const buffer = await fetch(journey.data.file).then(r => { if (!r.ok) throw Error('Missing ' + journey.data.file); return r.arrayBuffer(); });
+        if (disposed) return;
+        journey.uniforms = stillPointerUniforms(journey.time);
+        journey.uniforms.uScale.value = size.pixelScale;
+        journey.current = createCurrent(journey.data, buffer, journey.uniforms);
+        journey.current.points.visible = false;
+        scene.add(journey.current.points);
+        dirty = true;
+      } catch (error) { console.warn('Journey current failed to load:', error); }
+    }
+  }
+
   // ---- Sizing: keep the designed frame on any screen (as the hero always did) ----
   function resize() {
     const width = innerWidth, height = innerHeight;
@@ -60,6 +80,7 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
     size = { width, height, pixelScale: height * renderer.getPixelRatio() / (2 * tanV) };
     route.measure();
     for (const slot of loader.slots) slot.module?.resize(size);
+    for (const journey of journeys) if (journey.uniforms) journey.uniforms.uScale.value = size.pixelScale;
     dirty = true;
   }
   const observer = new ResizeObserver(resize);
@@ -80,6 +101,7 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
   loader.focus(0);
   await loader.loading;
   if (loader.slots[0].status !== 'ready') { dispose(); throw loader.slots[0].error ?? Error('Stop 01 did not load'); }
+  loadJourneys();       // in the background, after stop 01
 
   // ---- Frame loop ----------------------------------------------------------------
   const pose = { position: new THREE.Vector3(), quaternion: new THREE.Quaternion() };
@@ -122,6 +144,12 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
       }
       if (visible && slot.module.update(dt)) animating = true;
     }
+    for (const journey of journeys) {
+      if (!journey.current) continue;
+      const visible = state.visible.includes(journey.k) && state.visible.includes(journey.k + 1);
+      if (journey.current.points.visible !== visible) { journey.current.points.visible = visible; dirty = true; }
+      if (visible && !paused && (state.rest === journey.k || state.rest === journey.k + 1)) { journey.time.value += dt; animating = true; }
+    }
     if (!dirty && !animating) { streak = 0; return; }
     dirty = false;
     renderer.render(scene, camera);
@@ -151,6 +179,7 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
     cancelAnimationFrame(raf);
     cleanup.forEach(fn => fn());
     dots.dispose();
+    for (const journey of journeys) if (journey.current) { scene.remove(journey.current.points); journey.current.dispose(); }
     loader.dispose();
     renderer.dispose();
     renderer.forceContextLoss();

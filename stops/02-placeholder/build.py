@@ -19,8 +19,8 @@ BRIEF = {'status': 'placeholder for route testing, not briefed'}
 
 # How the camera reaches this stop from the previous one (used by tools/build_route.py):
 # a half circle of `radius` units that swings toward the previous stop's objects while
-# tilting 90 degrees `tilt`, then a straight `travel` of that many units.
-ENTER = {'tilt': 'down', 'radius': 8.0, 'travel': 14.0}
+# tilting `tilt_degrees` in direction `tilt`, then a straight `travel` along the new view.
+ENTER = {'tilt': 'down', 'tilt_degrees': 60, 'radius': 8.0, 'travel': 8.0}
 
 # Same camera and frame as stop 01, so every stop rests the same way.
 CAMERA_AT = (0.0, -11.0, 0.0)

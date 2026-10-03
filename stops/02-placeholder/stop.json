@@ -18,8 +18,9 @@
   },
   "enter": {
     "tilt": "down",
+    "tilt_degrees": 60,
     "radius": 8.0,
-    "travel": 14.0
+    "travel": 8.0
   },
   "brief": {
     "status": "placeholder for route testing, not briefed"

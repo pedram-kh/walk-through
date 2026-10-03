@@ -11,9 +11,11 @@ Outputs beside this file:
   flow.bin                   current particles: path t radius angle jitter*2 size r g b seed (float32 x 11)
   stop.json                  contract: rest camera, brief, palette, tiles, dust, flow
 """
-import bpy, json, math, random, struct
+import bpy, json, math, random, struct, sys
 from pathlib import Path
 from mathutils import Vector, Euler, Matrix
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'tools'))
+from flow_common import make_current
 
 OUT = Path(__file__).resolve().parent
 
@@ -110,7 +112,8 @@ TILES = [
 # Paths are control points placed like the tiles: (x, y) in the frame and a depth
 # from the camera. Deeper than a tile = behind it, shallower = in front, so
 # alternating depths wrap the current around a tile. Particles flow from the first
-# point to the last and fade at both ends; the current ends before the copy.
+# point to the last. The main path's tail leaves the frame at the bottom, toward the
+# camera's dive; tools/build_route.py carries it on from there to the next stop.
 # Tile depths (before TILE_SCALE, which scales both alike): splash 7.6, portrait (centre) 9.7, card (Hi-Fi) 10.5, product (UGC)
 # 11.9, texture (Design) 13.3, landscape 13.4, statement (Static) 14.0, hero (Motion) 16.9
 MAIN_PATH = [
@@ -128,7 +131,8 @@ MAIN_PATH = [
     (0.319, 0.700, 23.0),  # down its left side, behind
     (0.382, 0.742, 22.0),  # back through the gap between the square and the strip
     (0.328, 0.835, 19.0),  # under the strip, in front
-    (0.247, 0.872, 22.0),  # fading out to the bottom left
+    (0.330, 1.000, 16.0),  # on down, out of the bottom of the frame
+    (0.400, 1.300, 11.0),  # toward the camera's dive; the journey current continues from here
 ]
 STATIC_PATH = [
     (1.10, 0.40, 11.5),
@@ -390,85 +394,17 @@ group.links.new(set_mat.outputs['Geometry'], g_out.inputs[0])
 dust.modifiers.new('Dust points', 'NODES').node_group = group
 
 # ---- Current --------------------------------------------------------------------
-def catmull_rom(points, steps=24):
-    """Smooth curve through the points (uniform Catmull-Rom)."""
-    pts = [points[0] * 2 - points[1], *points, points[-1] * 2 - points[-2]]
-    out = []
-    for i in range(1, len(pts) - 2):
-        p0, p1, p2, p3 = pts[i - 1:i + 3]
-        for k in range(steps):
-            t = k / steps
-            out.append(0.5 * (2 * p1 + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t
-                              + (3 * p1 - p0 - 3 * p2 + p3) * t ** 3))
-    out.append(points[-1].copy())
-    return out
-
-
-def resample(line, n):
-    """n points evenly spaced along a polyline, and its length."""
-    lengths = [0.0]
-    for a, b in zip(line, line[1:]):
-        lengths.append(lengths[-1] + (b - a).length)
-    out, j = [], 0
-    for i in range(n):
-        s = lengths[-1] * i / (n - 1)
-        while j < len(line) - 2 and lengths[j + 1] < s:
-            j += 1
-        seg = lengths[j + 1] - lengths[j]
-        out.append(line[j].lerp(line[j + 1], (s - lengths[j]) / seg if seg else 0))
-    return out, lengths[-1]
-
-
-def path_frames(samples):
-    """Normal and binormal along the path; the normal starts facing the camera
-    plane and is carried along without twisting (parallel transport)."""
-    n = len(samples)
-    tangents = [(samples[min(i + 1, n - 1)] - samples[max(i - 1, 0)]).normalized() for i in range(n)]
-    normal = tangents[0].cross((target - camera.location).normalized()).normalized()
-    normals = []
-    for t in tangents:
-        normal = (normal - t * normal.dot(t)).normalized()
-        normals.append(normal)
-    return normals, [t.cross(nm) for t, nm in zip(tangents, normals)]
-
-
-def smoothstep(a, b, x):
-    x = min(max((x - a) / (b - a), 0.0), 1.0)
-    return x * x * (3 - 2 * x)
-
-
-flow_paths, flow_data = [], []         # flow_data rows match flow.bin
-still_points, still_colors, still_sizes = [], [], []
-base, bright = hex_rgb(FLOW_COLOR[0]), hex_rgb(FLOW_COLOR[1])
-for curve, (path, count, width, fibres, speed) in enumerate(FLOWS):
-    samples, length = resample(catmull_rom([screen_point(*spread(x, y), d / TILE_SCALE) for x, y, d in path]),
-                               FLOW_SAMPLES)
-    normals, binormals = path_frames(samples)
-    flow_paths.append({'length': round(length, 4), 'speed': speed, 'points': [y_up(p) for p in samples],
-                       'normals': [y_up(v) for v in normals], 'binormals': [y_up(v) for v in binormals]})
-    strands = [(abs(random.gauss(0, 0.5)) * width, random.uniform(0, math.tau)) for _ in range(fibres)]
-    for _ in range(int(count * FLOW_AMOUNT)):
-        if random.random() < 0.8:      # on a fibre
-            (r, theta), jitter = random.choice(strands), 0.012
-        else:                          # loose haze around the current
-            r, theta, jitter = abs(random.gauss(0, 0.6)) * width, random.uniform(0, math.tau), 0.05
-        t0, ja, jb = random.random(), random.gauss(0, jitter), random.gauss(0, jitter)
-        mix, gain = random.random() ** 2, random.uniform(0.6, 2.0)
-        color = [gain * (b * (1 - mix) + br * mix) for b, br in zip(base, bright)]
-        size = DUST_RADIUS * random.uniform(0.4, 1.25)
-        flow_data.append((curve, t0, r, theta, ja, jb, size, *color, random.random()))
-        # The still shows the current at time 0, placed the way hero.js places it.
-        f = t0 * (FLOW_SAMPLES - 1)
-        i = min(int(f), FLOW_SAMPLES - 2)
-        u = f - i
-        nm = normals[i].lerp(normals[i + 1], u).normalized()
-        bn = binormals[i].lerp(binormals[i + 1], u).normalized()
-        angle, taper = theta + FLOW_TWIST * t0, 0.35 + 0.65 * math.sin(math.pi * t0)
-        still_points.append(samples[i].lerp(samples[i + 1], u)
-                            + (nm * math.cos(angle) + bn * math.sin(angle)) * r * taper + nm * ja + bn * jb)
-        fade = smoothstep(0, 0.06, t0) * (1 - smoothstep(0.9, 1, t0))
-        still_colors.append((*(c * fade for c in color), 1))
-        still_sizes.append(size)
+flow_paths_v, flow_data, still = make_current(
+    [([screen_point(*spread(x, y), d / TILE_SCALE) for x, y, d in path], count, width, fibres, speed)
+     for path, count, width, fibres, speed in FLOWS],
+    facing=target - camera.location, samples=FLOW_SAMPLES, amount=FLOW_AMOUNT, twist=FLOW_TWIST,
+    base=hex_rgb(FLOW_COLOR[0]), bright=hex_rgb(FLOW_COLOR[1]), radius=DUST_RADIUS)
+flow_paths = [{'length': round(p['length'], 4), 'speed': p['speed'], 'points': [y_up(v) for v in p['points']],
+               'normals': [y_up(v) for v in p['normals']], 'binormals': [y_up(v) for v in p['binormals']]}
+              for p in flow_paths_v]
+still_points = [p for p, _, _ in still]
+still_colors = [c for _, c, _ in still]
+still_sizes = [z for _, _, z in still]
 
 current_mesh = bpy.data.meshes.new('Galaxy current')
 current_mesh.from_pydata(still_points, [], [])

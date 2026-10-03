@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GREY_GLSL, addGrey } from '../../runtime/materials.js';
+import { POINTER_PUSH, POINT_FRAGMENT, createCurrent } from '../../runtime/flow.js';
 
 const CONFIG = {
   // Real photos: tile label -> image URL (relative to this stop's folder).
@@ -63,19 +64,6 @@ void main() {
   #include <colorspace_fragment>
 }`;
 
-// Shared by the dust and the current: the cursor ray (and its slower trail) push points aside.
-const POINTER_PUSH = /* glsl */`
-uniform float uTime, uScale, uActive, uRadius, uPush, uSwirl, uTrail, uSizeBoost, uDrift;
-uniform vec3 uRayO, uRayD, uTrailO, uTrailD;
-varying vec3 vColor;
-vec4 pushFrom(vec3 p, vec3 o, vec3 d) {      // xyz = offset, w = influence
-  vec3 away = p - (o + d * dot(p - o, d));
-  float dist = max(length(away), 1e-4);
-  float f = exp(-dist * dist / (uRadius * uRadius));
-  vec3 n = away / dist;
-  return vec4((n * uPush + cross(d, n) * uSwirl) * f, f);
-}`;
-
 const DUST_VERTEX = /* glsl */`
 attribute vec3 aColor; attribute float aSize; attribute float aSeed;
 ${POINTER_PUSH}
@@ -90,44 +78,6 @@ void main() {
   gl_PointSize = max(1.6, aSize * 2.0 * uSizeBoost * uScale / -view.z);
   float twinkle = 0.72 + 0.28 * sin(uTime * (0.8 + aSeed * 2.0) + aSeed * 50.0);
   vColor = aColor * twinkle * (1.0 + near.w * uActive * 1.4);
-}`;
-
-// The current: each particle rides a fibre at a fixed offset from its path and moves
-// along it. Paths come from stop.json as a texture: per path, rows of points, normals, binormals.
-const FLOW_VERTEX = /* glsl */`
-attribute vec3 aColor; attribute float aSize; attribute float aSeed;
-attribute float aPath, aT, aRadius, aAngle, aRate; attribute vec2 aJitter;
-uniform sampler2D uPath; uniform float uSamples, uTwist;
-${POINTER_PUSH}
-vec3 along(int row, float t) {               // linear between the two nearest samples
-  float f = t * (uSamples - 1.0);
-  int i = int(f), last = int(uSamples) - 1;
-  return mix(texelFetch(uPath, ivec2(i, row), 0).xyz, texelFetch(uPath, ivec2(min(i + 1, last), row), 0).xyz, fract(f));
-}
-void main() {
-  float t = fract(aT + uTime * aRate);
-  int row = int(aPath + 0.5) * 3;
-  vec3 n = normalize(along(row + 1, t)), b = normalize(along(row + 2, t));
-  float angle = aAngle + uTwist * t + uTime * 0.12, taper = 0.35 + 0.65 * sin(3.14159265 * t);
-  vec3 p = along(row, t) + (n * cos(angle) + b * sin(angle)) * aRadius * taper + n * aJitter.x + b * aJitter.y;
-  vec4 world = modelMatrix * vec4(p, 1.0);
-  vec4 near = pushFrom(world.xyz, uRayO, uRayD);
-  vec4 trail = pushFrom(world.xyz, uTrailO, uTrailD);
-  world.xyz += (near.xyz + trail.xyz * uTrail) * uActive * (0.6 + aSeed * 0.8);
-  vec4 view = viewMatrix * world;
-  gl_Position = projectionMatrix * view;
-  gl_PointSize = max(1.2, aSize * 2.0 * uSizeBoost * uScale / -view.z);
-  float fade = smoothstep(0.0, 0.06, t) * smoothstep(1.0, 0.9, t);   // hides the jump from end to start
-  float twinkle = 0.75 + 0.25 * sin(uTime * (0.8 + aSeed * 2.0) + aSeed * 50.0);
-  vColor = aColor * fade * twinkle * (1.0 + near.w * uActive * 1.4);
-}`;
-
-const DUST_FRAGMENT = /* glsl */`
-varying vec3 vColor;
-void main() {
-  float a = smoothstep(0.5, 0.12, length(gl_PointCoord - 0.5));
-  gl_FragColor = vec4(vColor * a, 1.0);
-  #include <colorspace_fragment>
 }`;
 
 // ctx (from the runtime): dir, camera, overlay (element for HTML captions), pointer
@@ -256,7 +206,7 @@ export async function load(ctx) {
     uTrailO: { value: new THREE.Vector3() }, uTrailD: { value: new THREE.Vector3(0, 0, -1) },
   };
   const dustMaterial = new THREE.ShaderMaterial({
-    uniforms: dustUniforms, vertexShader: DUST_VERTEX, fragmentShader: DUST_FRAGMENT,
+    uniforms: dustUniforms, vertexShader: DUST_VERTEX, fragmentShader: POINT_FRAGMENT,
     blending: THREE.AdditiveBlending, depthWrite: false, transparent: true,
   });
   const point = new THREE.Vector3(), inverse = new THREE.Matrix4();
@@ -284,40 +234,9 @@ export async function load(ctx) {
   }
 
   // ---- Current: particles flowing along the paths in stop.json ------------------
-  {
-    const { paths, samples, twist, count: flowCount, floats_per_point: fs } = contract.flow;
-    const flow = new Float32Array(flowBuffer);
-    if (flow.length !== flowCount * fs) throw Error('flow.bin does not match stop.json');
-    const pathData = new Float32Array(samples * paths.length * 3 * 4);
-    paths.forEach((path, p) => ['points', 'normals', 'binormals'].forEach((key, k) =>
-      path[key].forEach((v, i) => pathData.set(v, ((p * 3 + k) * samples + i) * 4))));
-    const pathTexture = new THREE.DataTexture(pathData, samples, paths.length * 3, THREE.RGBAFormat, THREE.FloatType);
-    pathTexture.needsUpdate = true;
-    cleanup.push(() => pathTexture.dispose());
-    const column = width => new Float32Array(flowCount * width);
-    const [pathIndex, t0, radius, angle, rate, size, seed] = [1, 1, 1, 1, 1, 1, 1].map(column);
-    const jitter = column(2), color = column(3);
-    for (let i = 0; i < flowCount; i++) {
-      const k = i * fs, path = paths[flow[k]];
-      pathIndex[i] = flow[k]; t0[i] = flow[k + 1]; radius[i] = flow[k + 2]; angle[i] = flow[k + 3];
-      jitter.set([flow[k + 4], flow[k + 5]], i * 2);
-      size[i] = flow[k + 6]; color.set([flow[k + 7], flow[k + 8], flow[k + 9]], i * 3); seed[i] = flow[k + 10];
-      rate[i] = path.speed / path.length;   // path lengths per second
-    }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(column(3), 3));   // placed in the shader
-    for (const [name, array, width] of [['aPath', pathIndex, 1], ['aT', t0, 1], ['aRadius', radius, 1], ['aAngle', angle, 1],
-      ['aRate', rate, 1], ['aJitter', jitter, 2], ['aSize', size, 1], ['aColor', color, 3], ['aSeed', seed, 1]]) {
-      geometry.setAttribute(name, new THREE.BufferAttribute(array, width));
-    }
-    const current = new THREE.Points(geometry, new THREE.ShaderMaterial({
-      uniforms: { ...dustUniforms, uPath: { value: pathTexture }, uSamples: { value: samples }, uTwist: { value: twist } },
-      vertexShader: FLOW_VERTEX, fragmentShader: DUST_FRAGMENT,
-      blending: THREE.AdditiveBlending, depthWrite: false, transparent: true,
-    }));
-    current.frustumCulled = false;
-    root.add(current);
-  }
+  const current = createCurrent(contract.flow, flowBuffer, dustUniforms);
+  root.add(current.points);
+  cleanup.push(() => current.dispose());
 
   // ---- Captions follow their tiles on screen ---------------------------------
   let aspect = 2, stageW = 0, stageH = 0;

@@ -60,13 +60,19 @@ Scrolling back plays them in reverse.
 | B. Freeze | At the very first scroll movement away from rest: particles and videos stop, the 3D fades to black and white. |
 | C. Curtain up | The section's HTML scrolls up like a normal page, uncovering the frozen 3D. |
 | D. Empty | No section HTML on screen; only the frozen black-and-white 3D. |
-| E. Curl | The camera rides a half circle that swings toward the stop's objects (closest halfway round) while tilting 90 degrees evenly; the radius is set per stop in `enter.radius`. |
+| E. Curl | The camera rides a half circle that swings toward the stop's objects (closest halfway round) while tilting evenly; radius and tilt angle are set per stop (`enter.radius`, `enter.tilt_degrees`, default 90). |
 | F. Travel | The camera moves to stop N+1. |
 | G. Arrive | Stop N+1 arrives frozen and black and white. Its HTML scrolls up into view. |
 | H. Live | Once the whole section's HTML is on screen, stop N+1 turns to colour (if it has a colour version) and comes alive. |
 
-- The tilt in phase E is per transition: down, up, left or right. Everything
-  else in the move is the same every time.
+- The tilt in phase E is per transition: down, up, left or right, and its angle
+  (`tilt_degrees`). Everything else in the move is the same every time.
+- The particle current runs through the whole route (decided 2026-10-03): each
+  stop's current wraps its objects and leaves the frame toward the camera's dive;
+  a journey current (`currents/tNN.bin`, built by `tools/build_route.py`) picks it
+  up and runs ahead of the camera to the next stop. Like everything else it
+  freezes when scrolling starts and flows only while a neighbouring stop is live.
+  Each new stop's brief includes where the current enters and leaves it.
 - The nav bar is fixed at the top at all times; it is not part of any curtain.
 - Implementation: the flat page stays real HTML in normal document flow, one
   block per section. Between sections sits an empty spacer whose height is the
@@ -121,7 +127,8 @@ app.js                  chooses 3D route or flat page (touch, reduced motion, fa
 route.json              built by tools/build_route.py from the stops' stop.json files
 assets/                 page-level files (logo)
 runtime/
-  runtime.js            renderer, camera fitting, pointer, frame loop, freeze/grey, fps guard, diagnostics
+  runtime.js            renderer, camera fitting, pointer, frame loop, freeze/grey, journey currents, fps guard, diagnostics
+  flow.js               particle current shader and builder, shared by stops and journey currents
   route.js              scroll -> camera pose and phase, measured from the section and spacer elements
   loader.js             loads N..N+2 (and N-1, N-2) one at a time, disposes further back, poster planes
   dots.js               progress dots on the left; click flies through by animating the scroll
@@ -131,15 +138,17 @@ stops/
   01-hero/              build.py, stop.js, stop.json, stop.glb, dust.bin, flow.bin, stop.blend, poster.jpg, media/
   02-placeholder/       graybox for testing the route (build.py, stop.js, stop.json, stop.glb, poster.jpg)
 tools/
-  build_route.py        Blender script: chains the stops (curl, 90-degree tilt, travel) -> route.json
+  build_route.py        Blender script: chains the stops (half circle, tilt, travel) -> route.json, journey
+                        currents -> currents/tNN.bin, camera clearance check
+  flow_common.py        shared current helpers (paths, frames, particles) for build scripts
+currents/               journey currents between stops, built by tools/build_route.py
 vendor/three/           unchanged
 ```
 
 Stop module interface (`stops/NN-name/stop.js`): `load(ctx)` returns
 `{ group, setFrozen(bool), setGrey(0..1), setVisible(bool), resize(size), update(dt), dispose() }`.
 `ctx` gives the stop its folder, the shared camera, the caption overlay, the pointer
-and `invalidate()`. Shared Blender helpers (`tools/blender_common.py`) come when a
-second real stop needs them.
+and `invalidate()`. Shared Blender helpers live in `tools/` (`flow_common.py` for currents).
 
 ### route.json format (built 2026-10-03)
 
@@ -272,3 +281,4 @@ in the world, so stops never overlap.
 | 2026-10-03 | 01 | Exceptions agreed: three videos, size above 2 MB | | | |
 | 2026-10-03 | 01 to 02 | Route skeleton: hero as stop 01, placeholder stop 02, curtain, freeze and grey, curl and 90-degree tilt down, travel, dots, flat fallback | not measured (run ?bench) | not measured | 01: 6.1 MB, 02: 0.1 MB |
 | 2026-10-03 | 01 to 02 | Transition move: half circle (radius 8) swinging toward the objects while tilting 90 degrees, then travel 14; clearance check in build_route.py (closest pass 4.4 units) | not measured | not measured | |
+| 2026-10-03 | 01 to 02 | Tilt 60 degrees, travel 8; current continues through the journey (stop 01 tail rerouted, currents/t01.bin, 10,441 particles); ~56k points on screen during the journey | not measured (run ?bench) | not measured | journey current 0.45 MB |
