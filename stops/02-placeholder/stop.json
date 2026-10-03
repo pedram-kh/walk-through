@@ -1,0 +1,32 @@
+{
+  "id": "02-placeholder",
+  "blender": "4.5.14 LTS",
+  "rest": {
+    "position": [
+      0.0,
+      0.0,
+      11.0
+    ],
+    "quaternion": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "horizontal_fov_deg": 65.47,
+    "design_aspect": 1.8469
+  },
+  "enter": {
+    "tilt": "down",
+    "curl": 2.5,
+    "travel": 14.0
+  },
+  "brief": {
+    "status": "placeholder for route testing, not briefed"
+  },
+  "color": [
+    0.18,
+    0.18,
+    0.2
+  ]
+}

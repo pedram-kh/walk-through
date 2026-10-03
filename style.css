@@ -1,66 +1,100 @@
-:root { --ink: #020204; --paper: #f2f1ee; --violet: #a14fe2; --teal: #2398af; }
+:root { --ink: #020204; --paper: #f2f1ee; --violet: #a14fe2; --teal: #2398af;
+  --type: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif; }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--ink); color: var(--paper); font-family: system-ui, sans-serif; }
-.hero { position: relative; height: 100svh; min-height: 480px; overflow: hidden; background: var(--ink); }
-.stage { position: absolute; inset: 0; }
+html, body { margin: 0; background: var(--ink); color: var(--paper); font-family: var(--type); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ---- Modes -----------------------------------------------------------------------
+   html.route        3D walk-through (set by app.js on capable devices)
+   html.route-ready  stop 01 is live: the canvas replaces the poster
+   no class          the flat page: sections show their stop posters, no spacers   */
+html.route { scroll-snap-type: y proximity; }       /* helps scrolling settle on a section */
+html.route.flying { scroll-snap-type: none; }       /* the dots fly without snapping */
+
+/* ---- 3D layers, pinned behind the page ---- */
+.stage { position: fixed; inset: 0; z-index: 0; display: none; }
+.route .stage { display: block; }
 .stage img, .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .stage img { object-fit: cover; }
 .stage canvas { opacity: 0; transition: opacity .6s ease; }
-.stage.ready canvas { opacity: 1; }
-.stage.ready img { visibility: hidden; }
-.pause { position: absolute; z-index: 2; right: 24px; bottom: 24px; padding: 10px 14px; font: inherit; font-size: 12px;
-  letter-spacing: .08em; color: #c9c8d6; background: transparent; border: 1px solid #ffffff33; border-radius: 99px; cursor: pointer; }
-.pause:hover { color: var(--paper); border-color: var(--violet); }
-.pause:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.route-ready .stage canvas { opacity: 1; }
+.route-ready .stage img { visibility: hidden; }
+.tags { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; display: none; }
+.route .tags { display: block; }
 
-/* ---- Copy layer (sits over the stage; lets the pointer through to it) ---- */
-.copy { position: absolute; inset: 0; pointer-events: none; z-index: 1;
-  --gutter: clamp(16px, 10vw, 172px); font-family: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif; }
-.copy::before { content: ''; position: absolute; inset: 0;
-  background: linear-gradient(90deg, #020204e6 0%, #020204b3 28%, #02020400 58%),
-              linear-gradient(180deg, #020204b3 0%, #02020400 18%); }
-.copy a, .copy button { pointer-events: auto; }
+/* Small spaced labels that ride on tiles (positioned by the stop) */
+.tile-tag { position: absolute; left: 0; top: 0; pointer-events: none; white-space: nowrap;
+  font: 11px var(--type); letter-spacing: .55em; text-transform: uppercase;
+  color: #dddce6; text-shadow: 0 0 2px #020204, 0 0 6px #020204, 0 0 14px #020204cc;
+  opacity: 0; transition: opacity .6s ease; will-change: transform; }
+.route-ready .tile-tag { opacity: 1; }
+
+/* ---- The page: sections are the curtain, spacers are the camera journeys ---- */
+main { position: relative; z-index: 2; }
+.section { position: relative; height: 100svh; min-height: 480px; overflow: hidden; pointer-events: none;
+  --gutter: clamp(16px, 10vw, 172px); }
+.section a, .section button { pointer-events: auto; }
+.route .section { scroll-snap-align: start; }
+html:not(.route) .section { background: var(--ink) var(--poster) center / cover no-repeat; }
+.spacer { display: none; }
+.route .spacer { display: block; height: calc(var(--screens, 3) * 100svh); }
+
 .grid-lines { position: absolute; inset: 0; display: flex; justify-content: space-between; padding: 0 var(--gutter); }
 .grid-lines i { width: 1px; background: linear-gradient(180deg, #ffffff12, #ffffff08 70%, #ffffff00); }
 
 /* Top bar, matched to catalyst-growth.com: 5rem tall, a centred 90rem container with
-   a 0.75-1rem side margin, the logo on the left and the menu icon on the right. */
-.nav { position: absolute; top: 0; left: 0; right: 0; height: 5rem; padding-block: 1em;
+   a 0.75-1rem side margin, the logo on the left and the menu icon on the right.
+   Fixed: it stays on screen through the whole route. */
+.nav { position: fixed; z-index: 3; top: 0; left: 0; right: 0; height: 5rem; padding-block: 1em;
   font-size: clamp(1rem, .9643rem + .1786vw, 1.125rem);   /* the site's fluid text size: 16px phone, 18px desktop */
   display: flex; align-items: center; justify-content: center; }
 .nav-inner { width: calc(100% - clamp(.75rem, .6786rem + .357vw, 1rem) * 2); max-width: 90rem;
   display: flex; align-items: center; justify-content: space-between; }
 .brand { flex: none; width: 7.5em; display: flex; align-items: center; }
 .brand img { display: block; width: 100%; height: auto; }      /* fills the 7.5em box, like the site */
-.pill { display: inline-block; padding: 15px 30px; border-radius: 99px; background: var(--paper); color: var(--ink);
-  font-size: 13px; text-transform: uppercase; letter-spacing: .02em; text-decoration: none; transition: background .2s ease; }
-.pill:hover { background: #fff; }
-.copy a:focus-visible, .copy button:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; }
 .menu { position: relative; width: 2em; height: 2em; display: flex; align-items: center; justify-content: center;
   padding: 0; font: inherit; background: none; border: 0; color: var(--paper); cursor: pointer; }
 .menu::before { content: ''; position: absolute; inset: -25%; }   /* larger hit area, like the site's 150% button */
 .menu svg { display: block; pointer-events: none; overflow: visible; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; }
 
+.pill { display: inline-block; padding: 15px 30px; border-radius: 99px; background: var(--paper); color: var(--ink);
+  font-size: 13px; text-transform: uppercase; letter-spacing: .02em; text-decoration: none; transition: background .2s ease; }
+.pill:hover { background: #fff; }
+
+/* ---- Section 01, hero ---- */
+.s-hero::before { content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, #020204e6 0%, #020204b3 28%, #02020400 58%),
+              linear-gradient(180deg, #020204b3 0%, #02020400 18%); }
 .lede { position: absolute; left: var(--gutter); top: 20%; max-width: min(920px, 60vw); }
-.lede h1 { margin: 0 0 28px; font-weight: 400; font-size: clamp(38px, 4.6vw, 78px); line-height: .96;
+.lede h1, .lede h2 { margin: 0 0 28px; font-weight: 400; font-size: clamp(38px, 4.6vw, 78px); line-height: .96;
   letter-spacing: -.03em; text-transform: uppercase; text-shadow: 0 0 40px #02020499; }
 .lede h1 span { display: block; }
 .lede p { margin: 0 0 40px; font-size: clamp(15px, 1.1vw, 18px); line-height: 1.45; color: #d6d5de; }
-
 .pillars { position: absolute; left: clamp(16px, 4vw, 68px); bottom: 48px; margin: 0; padding: 0; list-style: none;
   display: grid; gap: 10px; font-size: 11px; letter-spacing: .55em; text-transform: uppercase; color: #c9c8d6; }
 
-/* Small spaced labels that ride on tiles (positioned by hero.js) */
-.tile-tag { position: absolute; left: 0; top: 0; z-index: 1; pointer-events: none; white-space: nowrap;
-  font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: .55em; text-transform: uppercase;
-  color: #dddce6; text-shadow: 0 0 2px #020204, 0 0 6px #020204, 0 0 14px #020204cc;
-  opacity: 0; transition: opacity .6s ease; will-change: transform; }
-.stage.ready .tile-tag { opacity: 1; }
+/* ---- Section 02, placeholder ---- */
+.lede .eyebrow { margin-bottom: 18px; font: 12px/1 ui-monospace, Menlo, monospace; letter-spacing: .08em;
+  text-transform: uppercase; color: #9a99a6; }
+
+/* ---- Page-level controls ---- */
+.route-dots { position: fixed; z-index: 3; left: clamp(6px, 1.2vw, 22px); top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 6px; }
+.route-dots button { width: 20px; height: 20px; padding: 0; border: 0; background: none; cursor: pointer;
+  display: grid; place-items: center; }
+.route-dots button::before { content: ''; width: 6px; height: 6px; border-radius: 50%; border: 1px solid #ffffff73;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease; }
+.route-dots button:hover::before { border-color: var(--paper); }
+.route-dots button[aria-current]::before { background: var(--paper); border-color: var(--paper); transform: scale(1.3); }
+
+.pause { position: fixed; z-index: 3; right: 24px; bottom: 24px; padding: 10px 14px; font: inherit; font-size: 12px;
+  letter-spacing: .08em; color: #c9c8d6; background: transparent; border: 1px solid #ffffff33; border-radius: 99px; cursor: pointer; }
+.pause:hover { color: var(--paper); border-color: var(--violet); }
 
 @media (max-width: 760px) {
   .lede { top: 16%; right: var(--gutter); max-width: none; }
   .lede p br { display: none; }
-  .copy::before { background: linear-gradient(180deg, #020204d9 0%, #02020499 55%, #02020400 85%); }
+  .s-hero::before { background: linear-gradient(180deg, #020204d9 0%, #02020499 55%, #02020400 85%); }
   .pillars { display: none; }
 }

@@ -1,18 +1,29 @@
 {
+  "id": "01-hero",
   "blender": "4.5.14 LTS",
-  "camera": {
+  "rest": {
     "position": [
       0.0,
       -0.2,
       11.0
     ],
-    "target": [
+    "quaternion": [
+      0.00909,
       0.0,
       0.0,
-      -0.0
+      0.999959
     ],
     "horizontal_fov_deg": 65.47,
     "design_aspect": 1.8469
+  },
+  "brief": {
+    "status": "approved 2026-10-03",
+    "text": "HTML over the scene: headline, subline, Strategy/Production/Performance/Scale list. HTML captions that ride on tiles: UGC, Motion, Static, Design, Hi-Fi.",
+    "buttons": "HTML 'Let's talk' pill under the subline, links to catalyst-growth.com/contact. Top bar (page level): logo, five-diamond menu icon.",
+    "button_behaviour": "Part of the section HTML: scrolls away with the curtain.",
+    "scene_behaviour": "Idle: tiles bob, dust twinkles, the particle current flows, three videos play. Cursor: tiles near it tilt and lift, dust and current part around it. Leaving: freezes and turns black and white at the first scroll movement.",
+    "media": "19 photos on tiles (8 colour, 11 tinted on galaxy tiles), videos on hero, portrait and product tiles.",
+    "exceptions": "three playing videos; size above 2 MB (agreed 2026-10-03)"
   },
   "palette_linear": {
     "background": [

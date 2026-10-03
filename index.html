@@ -4,40 +4,57 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#020204">
-<title>Catalyst hero</title>
+<title>Catalyst: full-funnel creative for AI brands</title>
 <link rel="stylesheet" href="style.css">
 <script type="importmap">{"imports":{"three":"./vendor/three/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 <script type="module" src="app.js"></script>
 </head>
 <body>
-<main>
-  <section class="hero" aria-labelledby="hero-title">
-    <div class="stage" id="stage">
-      <img id="poster" src="layout.png" width="1616" height="875" alt="Floating image tiles and violet and teal galaxy dust receding into the dark.">
+<!-- 3D route (pinned behind the page). The poster shows until stop 01 is ready. -->
+<div class="stage" id="stage" aria-hidden="true">
+  <img id="poster" src="stops/01-hero/poster.jpg" width="1616" height="875" alt="">
+</div>
+<div class="tags" id="tags" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="https://www.catalyst-growth.com/" aria-label="Catalyst home">
+      <img src="assets/catalyst-logo@2x.png" width="121.5" height="28" alt="">
+    </a>
+    <button class="menu" type="button" aria-label="Open menu">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M1 4L4 1L7 4L4 7L1 4Z" fill="currentColor"/><path d="M1 16L4 13L7 16L4 19L1 16Z" fill="currentColor"/><path d="M13 4L16 1L19 4L16 7L13 4Z" fill="currentColor"/><path d="M13 16L16 13L19 16L16 19L13 16Z" fill="currentColor"/><path d="M7 10L10 7L13 10L10 13L7 10Z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- The flat page: the real content, one section per stop. In 3D mode it scrolls over
+     the scene like a curtain; the empty spacers between sections are the camera journeys. -->
+<main id="page">
+  <section class="section s-hero" id="s01" data-title="Hero" aria-labelledby="hero-title"
+           style="--poster: url('stops/01-hero/poster.jpg')">
+    <div class="grid-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="lede">
+      <h1 id="hero-title"><span>Full-funnel creative</span> <span>for AI brands</span> <span>that scale.</span></h1>
+      <p>From UGC and Design to Hi-Fi and Motion,<br> we make high-performing ads for complex AI products.</p>
+      <a class="pill" href="https://www.catalyst-growth.com/contact">Let’s talk</a>
     </div>
-    <div class="copy">
-      <div class="grid-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <header class="nav">
-        <div class="nav-inner">
-          <a class="brand" href="https://www.catalyst-growth.com/" aria-label="Catalyst home">
-            <img src="images/catalyst-logo@2x.png" width="121.5" height="28" alt="">
-          </a>
-          <button class="menu" type="button" aria-label="Open menu">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M1 4L4 1L7 4L4 7L1 4Z" fill="currentColor"/><path d="M1 16L4 13L7 16L4 19L1 16Z" fill="currentColor"/><path d="M13 4L16 1L19 4L16 7L13 4Z" fill="currentColor"/><path d="M13 16L16 13L19 16L16 19L13 16Z" fill="currentColor"/><path d="M7 10L10 7L13 10L10 13L7 10Z" fill="currentColor"/></svg>
-          </button>
-        </div>
-      </header>
-      <div class="lede">
-        <h1 id="hero-title"><span>Full-funnel creative</span> <span>for AI brands</span> <span>that scale.</span></h1>
-        <p>From UGC and Design to Hi-Fi and Motion,<br> we make high-performing ads for complex AI products.</p>
-        <a class="pill" href="https://www.catalyst-growth.com/contact">Let’s talk</a>
-      </div>
-      <ul class="pillars" aria-label="What we do">
-        <li>Strategy</li><li>Production</li><li>Performance</li><li>Scale</li>
-      </ul>
+    <ul class="pillars" aria-label="What we do">
+      <li>Strategy</li><li>Production</li><li>Performance</li><li>Scale</li>
+    </ul>
+  </section>
+
+  <div class="spacer" id="t01" aria-hidden="true"></div>
+
+  <section class="section s-placeholder" id="s02" data-title="Creative for" aria-labelledby="s02-title"
+           style="--poster: url('stops/02-placeholder/poster.jpg')">
+    <div class="lede">
+      <p class="eyebrow">02 · Creative for</p>
+      <h2 id="s02-title">Placeholder stop</h2>
+      <p>Stop 02 is not built yet. This section tests the route.</p>
     </div>
-    <button class="pause" id="pause" type="button" aria-pressed="false" hidden>Pause motion</button>
   </section>
 </main>
+
+<button class="pause" id="pause" type="button" aria-pressed="false" hidden>Pause motion</button>
 </body>
 </html>

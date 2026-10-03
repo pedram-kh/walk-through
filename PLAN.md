@@ -112,35 +112,36 @@ Scrolling back plays them in reverse.
   motion, interaction and video. Blender materials are for the preview render;
   the browser rebuilds each material in three.js (as `hero.js` does now).
 
-### Folder layout (proposed)
+### Folder layout (built 2026-10-03)
 
 ```
-index.html              flat page: nav + every section in order + spacers; boots the runtime
-style.css               page and section styles
-app.js                  chooses 3D route or fallback (touch, reduced motion, GPU failure)
+index.html              flat page: fixed nav, every section in order, spacers between them
+style.css               page, section and route styles (html.route = 3D mode)
+app.js                  chooses 3D route or flat page (touch, reduced motion, failure); Pause button
 route.json              built by tools/build_route.py from the stops' stop.json files
+assets/                 page-level files (logo)
 runtime/
-  runtime.js            renderer, camera, resize, pixel ratio, fps/quality guard, context loss
-  scroll.js             maps scroll to phases A-H using the section and spacer elements
-  loader.js             loads N+1 and N+2 in the background, disposes stops 3+ behind
-  poster.js             poster-on-a-plane stand-in while a stop is still loading
-  bench.js              ?bench: scrolls the whole route and logs fps per stop and phase
+  runtime.js            renderer, camera fitting, pointer, frame loop, freeze/grey, fps guard, diagnostics
+  route.js              scroll -> camera pose and phase, measured from the section and spacer elements
+  loader.js             loads N..N+2 (and N-1, N-2) one at a time, disposes further back, poster planes
+  dots.js               progress dots on the left; click flies through by animating the scroll
+  materials.js          shared black-and-white helper for stop materials
+  bench.js              ?bench: drives the route and prints fps per stop and phase
 stops/
-  01-hero/
-    build.py            was build_layout.py
-    stop.js             was hero.js, minus everything the runtime now owns
-    stop.json           contract: answers to the five questions, tiles, dust, flow, budgets
-    stop.glb  dust.bin  flow.bin  stop.blend
-    poster.jpg          was layout.png (compressed)
-    media/              this stop's images and videos
-  02-clients/ ...
+  01-hero/              build.py, stop.js, stop.json, stop.glb, dust.bin, flow.bin, stop.blend, poster.jpg, media/
+  02-placeholder/       graybox for testing the route (build.py, stop.js, stop.json, stop.glb, poster.jpg)
 tools/
-  blender_common.py     shared helpers: screen placement, particles, export, y_up
-  build_route.py        Blender script: joins the stops into one camera path -> route.json
+  build_route.py        Blender script: chains the stops (curl, 90-degree tilt, travel) -> route.json
 vendor/three/           unchanged
 ```
 
-### route.json format (proposed)
+Stop module interface (`stops/NN-name/stop.js`): `load(ctx)` returns
+`{ group, setFrozen(bool), setGrey(0..1), setVisible(bool), resize(size), update(dt), dispose() }`.
+`ctx` gives the stop its folder, the shared camera, the caption overlay, the pointer
+and `invalidate()`. Shared Blender helpers (`tools/blender_common.py`) come when a
+second real stop needs them.
+
+### route.json format (built 2026-10-03)
 
 World units are scene units, Y up (three.js). Each stop sits at its own origin
 in the world, so stops never overlap.
@@ -269,3 +270,4 @@ in the world, so stops never overlap.
 |---|---|---|---|---|---|
 | 2026-10-03 | 01 | Hero approved as a scene; first commit pushed | not measured | n/a | 6.1 MB |
 | 2026-10-03 | 01 | Exceptions agreed: three videos, size above 2 MB | | | |
+| 2026-10-03 | 01 to 02 | Route skeleton: hero as stop 01, placeholder stop 02, curtain, freeze and grey, curl and 90-degree tilt down, travel, dots, flat fallback | not measured (run ?bench) | not measured | 01: 6.1 MB, 02: 0.1 MB |

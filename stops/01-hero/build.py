@@ -1,21 +1,36 @@
-"""Catalyst hero - layout pass (Blender 4.5 LTS, CPU render).
+"""Stop 01, hero - layout pass (Blender 4.5 LTS, CPU render).
 
 Builds flat tiles (photo + galaxy) and galaxy dust, renders a preview, and
 exports the browser assets.
 Run:
-  /Applications/Blender.app/Contents/MacOS/Blender --background --python build_layout.py
+  /Applications/Blender.app/Contents/MacOS/Blender --background --python stops/01-hero/build.py
 Outputs beside this file:
-  layout.png, layout.blend   preview render and editable scene
-  hero.glb                   the tiles (names, sizes, rest transforms)
+  poster.jpg, stop.blend     preview render (also the fallback poster) and editable scene
+  stop.glb                   the tiles (names, sizes, rest transforms)
   dust.bin                   dust points: x y z r g b size owner (float32 x 8)
   flow.bin                   current particles: path t radius angle jitter*2 size r g b seed (float32 x 11)
-  hero.json                  camera, palette and tile list for the browser
+  stop.json                  contract: rest camera, brief, palette, tiles, dust, flow
 """
 import bpy, json, math, random, struct
 from pathlib import Path
-from mathutils import Vector, Euler
+from mathutils import Vector, Euler, Matrix
 
 OUT = Path(__file__).resolve().parent
+
+# What was agreed for this stop (the five content questions), kept in stop.json.
+BRIEF = {
+    'status': 'approved 2026-10-03',
+    'text': 'HTML over the scene: headline, subline, Strategy/Production/Performance/Scale list. '
+            'HTML captions that ride on tiles: UGC, Motion, Static, Design, Hi-Fi.',
+    'buttons': "HTML 'Let's talk' pill under the subline, links to catalyst-growth.com/contact. "
+               'Top bar (page level): logo, five-diamond menu icon.',
+    'button_behaviour': 'Part of the section HTML: scrolls away with the curtain.',
+    'scene_behaviour': 'Idle: tiles bob, dust twinkles, the particle current flows, three videos play. '
+                       'Cursor: tiles near it tilt and lift, dust and current part around it. '
+                       'Leaving: freezes and turns black and white at the first scroll movement.',
+    'media': '19 photos on tiles (8 colour, 11 tinted on galaxy tiles), videos on hero, portrait and product tiles.',
+    'exceptions': 'three playing videos; size above 2 MB (agreed 2026-10-03)',
+}
 SEED = 7
 
 # ---- Palette (sampled from the Catalyst reference artwork; edit here) -------
@@ -264,7 +279,7 @@ def galaxy_material(name, tint, bright, photo=None):
 
 def photo_file(label):
     """The real photo for a tile: the video poster on video tiles, else the image."""
-    for path in (OUT / 'videos' / f'{label}-poster.jpg', OUT / 'images' / f'{label}.jpg'):
+    for path in (OUT / 'media' / 'videos' / f'{label}-poster.jpg', OUT / 'media' / 'images' / f'{label}.jpg'):
         if path.exists():
             return path
     return None
@@ -478,16 +493,18 @@ scene.cycles.use_denoising = False
 scene.cycles.max_bounces = 1
 scene.view_settings.view_transform = 'Standard'
 scene.render.resolution_percentage = 100
-scene.render.filepath = str(OUT / 'layout.png')
+scene.render.image_settings.file_format = 'JPEG'
+scene.render.image_settings.quality = 85
+scene.render.filepath = str(OUT / 'poster.jpg')
 
-bpy.ops.wm.save_as_mainfile(filepath=str(OUT / 'layout.blend'))
+bpy.ops.wm.save_as_mainfile(filepath=str(OUT / 'stop.blend'))
 bpy.ops.render.render(write_still=True)
 
 # ---- Browser export -----------------------------------------------------------
 bpy.ops.object.select_all(action='DESELECT')
 for ob in tiles:
     ob.select_set(True)
-bpy.ops.export_scene.gltf(filepath=str(OUT / 'hero.glb'), export_format='GLB', use_selection=True,
+bpy.ops.export_scene.gltf(filepath=str(OUT / 'stop.glb'), export_format='GLB', use_selection=True,
                           export_extras=True, export_materials='NONE', export_animations=False)
 
 with open(OUT / 'dust.bin', 'wb') as f:
@@ -499,13 +516,17 @@ with open(OUT / 'flow.bin', 'wb') as f:
         f.write(struct.pack('<11f', *row))
 
 aspect = scene.render.resolution_x / scene.render.resolution_y
+Y_UP = Matrix(((1, 0, 0), (0, 0, 1), (0, -1, 0)))      # Blender Z-up -> three.js Y-up
+rest_q = (Y_UP @ camera.matrix_world.to_3x3()).to_quaternion()
 contract = {
+    'id': '01-hero',
     'blender': bpy.app.version_string,
-    'camera': {
-        'position': y_up(camera.location), 'target': y_up(target),
-        'horizontal_fov_deg': round(math.degrees(2 * math.atan(cam_data.sensor_width / 2 / cam_data.lens)), 3),
-        'design_aspect': round(aspect, 4),
-    },
+    # The camera at rest, in this stop's own frame (three.js axes). The route
+    # places the stop in the world so that the route camera lands exactly here.
+    'rest': {'position': y_up(camera.location), 'quaternion': [round(v, 6) for v in (rest_q.x, rest_q.y, rest_q.z, rest_q.w)],
+             'horizontal_fov_deg': round(math.degrees(2 * math.atan(cam_data.sensor_width / 2 / cam_data.lens)), 3),
+             'design_aspect': round(aspect, 4)},
+    'brief': BRIEF,
     'palette_linear': {k: [round(c, 5) for c in v] for k, v in PALETTE.items()},
     'tiles': [{'name': ob.name, 'label': row[0], 'kind': row[1], 'width': row[4], 'height': row[5],
                'look': row[9]} for ob, row in zip(tiles, TILES)],
@@ -515,5 +536,5 @@ contract = {
              'layout': ['path', 't', 'radius', 'angle', 'jitter_n', 'jitter_b', 'size', 'r', 'g', 'b', 'seed'],
              'samples': FLOW_SAMPLES, 'twist': FLOW_TWIST, 'paths': flow_paths},
 }
-(OUT / 'hero.json').write_text(json.dumps(contract, indent=2))
+(OUT / 'stop.json').write_text(json.dumps(contract, indent=2))
 print(f'HERO_DONE tiles={len(tiles)} dust_points={len(points)} flow_points={len(flow_data)}')
