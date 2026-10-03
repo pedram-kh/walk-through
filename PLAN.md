@@ -60,7 +60,7 @@ Scrolling back plays them in reverse.
 | B. Freeze | At the very first scroll movement away from rest: particles and videos stop, the 3D fades to black and white. |
 | C. Curtain up | The section's HTML scrolls up like a normal page, uncovering the frozen 3D. |
 | D. Empty | No section HTML on screen; only the frozen black-and-white 3D. |
-| E. Curl | The camera eases forward a little in a curling motion and tilts 90 degrees. |
+| E. Curl | The camera rides a half circle that swings toward the stop's objects (closest halfway round) while tilting 90 degrees evenly; the radius is set per stop in `enter.radius`. |
 | F. Travel | The camera moves to stop N+1. |
 | G. Arrive | Stop N+1 arrives frozen and black and white. Its HTML scrolls up into view. |
 | H. Live | Once the whole section's HTML is on screen, stop N+1 turns to colour (if it has a colour version) and comes alive. |
@@ -271,3 +271,4 @@ in the world, so stops never overlap.
 | 2026-10-03 | 01 | Hero approved as a scene; first commit pushed | not measured | n/a | 6.1 MB |
 | 2026-10-03 | 01 | Exceptions agreed: three videos, size above 2 MB | | | |
 | 2026-10-03 | 01 to 02 | Route skeleton: hero as stop 01, placeholder stop 02, curtain, freeze and grey, curl and 90-degree tilt down, travel, dots, flat fallback | not measured (run ?bench) | not measured | 01: 6.1 MB, 02: 0.1 MB |
+| 2026-10-03 | 01 to 02 | Transition move: half circle (radius 8) swinging toward the objects while tilting 90 degrees, then travel 14; clearance check in build_route.py (closest pass 4.4 units) | not measured | not measured | |
