@@ -1,0 +1,268 @@
+# Walk-through plan
+
+We are turning the flat Catalyst landing page into a 3D scroll walk-through.
+Repo: https://github.com/pedram-kh/walk-through
+
+## Big picture
+
+- One pinned 3D scene. Scrolling moves the camera along a path through about
+  16 stops. Each stop is one section of the flat page rebuilt as a 3D scene.
+  The camera rests at each stop, then travels to the next.
+- The existing hero (tile wall, galaxy dust, particle current: `hero.js`,
+  `build_layout.py`) is stop 1. It is approved as a scene.
+- We build one stop at a time. Only after a stop is approved do we start the
+  next one.
+- Reference for the sections: `Catalyst AI Landing (standalone).html` (not
+  final). Screenshots per stop come with each stop's brief.
+
+## How each stop is built
+
+1. You provide reference images. I ask the questions under "Content and
+   buttons" and wait for your answers.
+2. Blender graybox: a Python script places simple shapes and extends the camera
+   path from the previous stop to this one. Render a preview and wait for
+   approval of composition and travel.
+3. Blender detail: real geometry and materials, still from a script.
+4. Export this stop as its own files, then wire it into the browser.
+5. Add the behaviour, text and buttons exactly as answered.
+6. Check it, record the numbers here, commit, and report. Then wait.
+
+Nothing is built, changed or pushed for a new stop without your confirmation.
+
+## Content and buttons: ask, do not assume
+
+Before building any stop, ask these and wait for the answers:
+
+1. Text: what text appears at this stop, and for each piece, is it HTML over
+   the scene or part of the 3D model?
+2. Buttons: which buttons does this stop have, what does each one do when
+   clicked, and is each one a 3D object or an HTML button?
+3. Button behaviour: how should each button look at rest, on hover and on
+   click, and how should it act as the camera approaches and leaves (grow with
+   distance, fade in on arrival, stay fixed on screen, or other)?
+4. Scene behaviour: what moves when idle, what reacts to the cursor, what
+   happens on click or drag, and what happens as the camera arrives and leaves.
+5. Media: which images or videos belong to this stop, and where they sit.
+
+Do not choose any of these myself. If an answer leaves something open, ask
+again. If a choice will hurt performance, keyboard access or the fallback page,
+say so in one line and let you decide. Record the answers in that stop's
+`stop.json` before building.
+
+## Transition design (decided 2026-10-03)
+
+Every move from stop N to stop N+1 plays these phases, driven by scroll.
+Scrolling back plays them in reverse.
+
+| Phase | What the visitor sees |
+|---|---|
+| A. Rest | Stop N in colour and live (particles, videos, cursor), its section's HTML fully on screen. |
+| B. Freeze | At the very first scroll movement away from rest: particles and videos stop, the 3D fades to black and white. |
+| C. Curtain up | The section's HTML scrolls up like a normal page, uncovering the frozen 3D. |
+| D. Empty | No section HTML on screen; only the frozen black-and-white 3D. |
+| E. Curl | The camera eases forward a little in a curling motion and tilts 90 degrees. |
+| F. Travel | The camera moves to stop N+1. |
+| G. Arrive | Stop N+1 arrives frozen and black and white. Its HTML scrolls up into view. |
+| H. Live | Once the whole section's HTML is on screen, stop N+1 turns to colour (if it has a colour version) and comes alive. |
+
+- The tilt in phase E is per transition: down, up, left or right. Everything
+  else in the move is the same every time.
+- The nav bar is fixed at the top at all times; it is not part of any curtain.
+- Implementation: the flat page stays real HTML in normal document flow, one
+  block per section. Between sections sits an empty spacer whose height is the
+  camera journey. While a spacer fills the screen (phase D) the scroll position
+  drives the curl and travel (E, F). The curtain is therefore ordinary page
+  scrolling: keyboard, scrollbar and screen readers keep working, and the
+  visible page is the real content (no hidden text for search engines).
+- Freeze and black and white are one switch per stop: time stops, videos
+  pause, and a grey uniform on the stop's materials goes 0 to 1 over ~0.5 s.
+
+## Stops (tentative, from the reference HTML; confirmed one by one)
+
+| Stop | Section | Notes |
+|---|---|---|
+| 01 | Hero | Approved scene (tile wall, dust, current). |
+| 02 | Creative for (client logos) | Its own stop, in 3D. Logo grid: Lovable, fyxer, MAGIC AI, Mozart, cleo, VIKTOR, Jack & Jill, plus Perplexity, Granola and Canva in the two empty top-left slots and the empty bottom-right slot. |
+| 03 | 02 The problem | |
+| 04 | 03 Complexity to message | |
+| 05 | 04 Creative translation | |
+| 06 | 05 Input: one product | |
+| 07 | Different audiences / use cases / messages | Unnumbered in the reference; may merge with 06. |
+| 08 | 07 Output: different formats | |
+| 09 | 08 Test | |
+| 10 | 09 Learn | |
+| 11 | 10 Iterate | |
+| 12 | 11 Scale | |
+| 13 | 12 Real performance | |
+| 14 | 13 Creative cycle | |
+| 15 | 14 Full service | |
+| 16 | 15 Pricing | Footer follows in plain HTML. |
+
+## Architecture
+
+- Each stop lives in `stops/NN-name/` with its build script, `.blend`, GLB, data
+  files, media, a still poster and a `stop.json` contract.
+- `route.json` at the root lists the stops in order, the camera path, the
+  camera orientation along it, and each stop's scroll anchors and rest view.
+- One runtime owns the renderer, camera, scroll progress, the route, the
+  pointer and the nav. Each stop is a module with `load()`, `enter()`,
+  `update(progress)`, `leave()`, `dispose()`, plus `setFrozen(bool)` and
+  `setGrey(0..1)` for the transition. No stop reaches into another stop.
+- Blender owns shapes, positions and the camera path. The browser owns all
+  motion, interaction and video. Blender materials are for the preview render;
+  the browser rebuilds each material in three.js (as `hero.js` does now).
+
+### Folder layout (proposed)
+
+```
+index.html              flat page: nav + every section in order + spacers; boots the runtime
+style.css               page and section styles
+app.js                  chooses 3D route or fallback (touch, reduced motion, GPU failure)
+route.json              built by tools/build_route.py from the stops' stop.json files
+runtime/
+  runtime.js            renderer, camera, resize, pixel ratio, fps/quality guard, context loss
+  scroll.js             maps scroll to phases A-H using the section and spacer elements
+  loader.js             loads N+1 and N+2 in the background, disposes stops 3+ behind
+  poster.js             poster-on-a-plane stand-in while a stop is still loading
+  bench.js              ?bench: scrolls the whole route and logs fps per stop and phase
+stops/
+  01-hero/
+    build.py            was build_layout.py
+    stop.js             was hero.js, minus everything the runtime now owns
+    stop.json           contract: answers to the five questions, tiles, dust, flow, budgets
+    stop.glb  dust.bin  flow.bin  stop.blend
+    poster.jpg          was layout.png (compressed)
+    media/              this stop's images and videos
+  02-clients/ ...
+tools/
+  blender_common.py     shared helpers: screen placement, particles, export, y_up
+  build_route.py        Blender script: joins the stops into one camera path -> route.json
+vendor/three/           unchanged
+```
+
+### route.json format (proposed)
+
+World units are scene units, Y up (three.js). Each stop sits at its own origin
+in the world, so stops never overlap.
+
+```json
+{
+  "version": 1,
+  "stops": [
+    {
+      "id": "01-hero",
+      "dir": "stops/01-hero/",
+      "origin": [0, 0, 0],
+      "rotation": [0, 0, 0, 1],
+      "rest": { "position": [0, -0.2, 11], "quaternion": [0, 0, 0, 1], "fov": 65.47, "designAspect": 1.8469 },
+      "section": "#s01",
+      "poster": "stops/01-hero/poster.jpg",
+      "sizeBytes": 0
+    }
+  ],
+  "segments": [
+    {
+      "from": "01-hero",
+      "to": "02-clients",
+      "tilt": "down",
+      "spacer": "#t01",
+      "spacerScreens": 1.5,
+      "samples": 120,
+      "position": [[0, -0.2, 11], "..."],
+      "quaternion": [[0, 0, 0, 1], "..."]
+    }
+  ]
+}
+```
+
+- `section` and `spacer` are element ids in `index.html`. The runtime measures
+  them, so scroll ranges adapt to any screen size: rest is "section fully on
+  screen", travel is "spacer on screen".
+- The camera path is stored as evenly spaced samples of position and
+  orientation (quaternions, so 90-degree tilts in any direction and the curl
+  need no special cases). Blender writes them; the browser only interpolates.
+- `tilt` records the direction for reference; the samples already contain it.
+
+### Changes to the current hero to make it stop 1
+
+1. Split `hero.js`: renderer, camera fitting, resize, pixel-ratio guard, fps
+   diagnostics, context loss and the pointer go to the runtime; tiles, dust,
+   current, videos and tile captions become `stops/01-hero/stop.js` with the
+   module interface.
+2. Camera: the rest view comes from `route.json` instead of `hero.json`. The
+   design-frame fitting (keep the designed frame on any aspect) moves to the
+   runtime and applies at every rest view.
+3. Freeze and grey: add a grey uniform to the photo, video, galaxy, dust and
+   current materials; `setFrozen` stops the clock and pauses videos (today this
+   is `setActive`).
+4. HTML: the hero copy becomes section `#s01` of the flat page in normal flow;
+   the nav moves out of the hero to a fixed page-level header; the Pause button
+   becomes global; the tile captions stay with the stop.
+5. Files move into `stops/01-hero/`; `build_layout.py` becomes `build.py`,
+   writes there, and uses shared helpers from `tools/`. `media.json` paths update.
+6. Budgets (see review notes): reduce stop 1 to the per-stop limits or record
+   an agreed exception.
+7. Fallback: `app.js` keeps its checks; the fallback becomes the flat page with
+   each stop's poster.
+
+## Rule 1: performance (one shared budget)
+
+- Test device: this Mac, Intel Iris Plus Graphics, 1920 x 1080. It must hold
+  30 fps or better through the whole route.
+- Only the stop at the camera animates, simulates and plays video. The previous
+  and next stops are visible but frozen. All others are hidden and cost nothing.
+- Per stop: at most 60,000 triangles, 40 draw calls and one playing video.
+  Pixel ratio capped at 1.5. Tell you before exceeding a budget.
+- After every stop, measure fps resting at it and travelling in and out, and
+  log it below with the date. If the route drops below 30 fps, fix that before
+  starting a new stop.
+- Measuring: the preview browser I use throttles itself when hidden, so fps is
+  measured with `?bench` in your Chrome (it scrolls the route and prints fps per
+  stop and phase), and the numbers are pasted into the log below.
+
+## Rule 2: loading (each stop is its own download)
+
+- Stop 1 loads first and shows as soon as it is ready. Nothing else blocks it.
+- While the visitor is at stop N, load stops N+1 and N+2 in the background.
+  Dispose stops more than two behind the camera and reload them if the visitor
+  scrolls back.
+- If a stop is not ready when the camera arrives, show its poster on a plane
+  and swap in the live version when loaded. Never freeze the scroll.
+- Keep each stop under 2 MB excluding video. Log each stop's size below.
+
+## Fallback
+
+- The flat page stays in the HTML as the real content for search engines,
+  keyboards and screen readers (and it is the visible content in 3D mode too).
+- Touch devices, reduced motion and any graphics failure get the flat page with
+  the stop posters instead of the 3D route.
+
+## Machine
+
+- Blender 4.5.14 LTS on an Intel Mac, run in the background:
+  `/Applications/Blender.app/Contents/MacOS/Blender --background --python <script>`
+- Render with Cycles on CPU, low samples. Scripts must be deterministic.
+- Serve with: `python3 -m http.server 4175`
+
+## Review notes and open items
+
+- Stop 1 plays three videos (Motion, centre, UGC); the budget allows one. Decide:
+  exception for stop 1, or two of those tiles show posters only.
+- Stop 1 is about 6.1 MB excluding video (images 2.75 MB, poster 1.5 MB,
+  flow.bin 1.2 MB, dust.bin 0.6 MB); the budget is 2 MB. Plan: WebP images at
+  tile size, a compressed poster, half-precision particle data. Or an agreed
+  exception.
+- Stop 1 fps has not been measured on the Iris Plus since the particle current
+  was added (27,000 points). First `?bench` run will tell.
+- Phase A to B is "the very first scroll movement". If the visitor stops between
+  rest positions, the scene stays frozen until they return to a rest position.
+  Optional: snap to the nearest rest position when scrolling stops (not decided).
+- Stop 02 needs logo artwork for all ten brands (SVG preferred) and the
+  reference page's grid and typography; to be asked when stop 02 starts.
+- Jump navigation between stops: not decided (asked 2026-10-03).
+
+## Log
+
+| Date | Stop | Event | Rest fps | Travel fps | Size (excl. video) |
+|---|---|---|---|---|---|
+| 2026-10-03 | 01 | Hero approved as a scene; first commit pushed | not measured | n/a | 6.1 MB |
