@@ -71,6 +71,10 @@ void main() {
   vColor = aColor * fade * twinkle * (1.0 + near.w * uActive * 1.4);
 }`;
 
+// Share of each current's particles that is drawn (every stop and journey). 0.6 = 40% less
+// dense than built (your request, 2026-10-05). The kept particles are a fixed, even sample.
+export const CURRENT_DENSITY = 0.6;
+
 // Uniforms for a current that no cursor touches (journey currents).
 export function stillPointerUniforms(time, sizeBoost = 1.9) {
   return {
@@ -86,9 +90,15 @@ export function stillPointerUniforms(time, sizeBoost = 1.9) {
 // count, floats_per_point }. uniforms: the pointer/time set (shared with dust if wanted).
 // Returns { points, dispose }.
 export function createCurrent(contract, buffer, uniforms) {
-  const { paths, samples, twist, count, floats_per_point: fs } = contract;
+  const { paths, samples, twist, count: built, floats_per_point: fs } = contract;
   const flow = new Float32Array(buffer);
-  if (flow.length !== count * fs) throw Error('Current data does not match its contract');
+  if (flow.length !== built * fs) throw Error('Current data does not match its contract');
+  const keep = [];
+  for (let i = 0; i < built; i++) {
+    const h = Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 1;   // fixed per particle
+    if (h < CURRENT_DENSITY) keep.push(i);
+  }
+  const count = keep.length;
   const pathData = new Float32Array(samples * paths.length * 3 * 4);
   paths.forEach((path, p) => ['points', 'normals', 'binormals'].forEach((key, k) =>
     path[key].forEach((v, i) => pathData.set(v, ((p * 3 + k) * samples + i) * 4))));
@@ -98,7 +108,7 @@ export function createCurrent(contract, buffer, uniforms) {
   const [pathIndex, t0, radius, angle, rate, size, seed] = [1, 1, 1, 1, 1, 1, 1].map(column);
   const jitter = column(2), color = column(3);
   for (let i = 0; i < count; i++) {
-    const k = i * fs, path = paths[flow[k]];
+    const k = keep[i] * fs, path = paths[flow[k]];
     pathIndex[i] = flow[k]; t0[i] = flow[k + 1]; radius[i] = flow[k + 2]; angle[i] = flow[k + 3];
     jitter.set([flow[k + 4], flow[k + 5]], i * 2);
     size[i] = flow[k + 6]; color.set([flow[k + 7], flow[k + 8], flow[k + 9]], i * 3); seed[i] = flow[k + 10];

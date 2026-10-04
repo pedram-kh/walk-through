@@ -301,3 +301,4 @@ in the world, so stops never overlap.
 | 2026-10-05 | 04 | Stop 04 approved | not measured | not measured | 0.6 MB |
 | 2026-10-05 | 01 | Dust removed at your request: stop.js no longer loads or draws dust.bin, so the current is the only particles at the hero (the build and the poster still include the dust; rebuilding stop 01 would reshuffle its approved current). Approved | not measured | not measured | 0.59 MB less to download (dust.bin no longer fetched) |
 | 2026-10-05 | 01 | Removed at your request: the 'Strategy / Production / Performance / Scale' list and the thin vertical background lines (HTML and CSS). Approved | not measured | not measured | |
+| 2026-10-05 | all | Currents 40% less dense at your request: runtime/flow.js draws a fixed, even 60% of every current's particles (CURRENT_DENSITY 0.6), stops and journeys alike; paths unchanged, no rebuilds. Points on screen at the hero 45,013 -> 27,045. Approved | not measured | not measured | |
