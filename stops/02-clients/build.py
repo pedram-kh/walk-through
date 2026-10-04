@@ -24,7 +24,7 @@ SEED = 23
 
 # What was agreed for this stop (the five content questions), kept in stop.json.
 BRIEF = {
-    'status': 'answers recorded 2026-10-04; graybox awaiting approval',
+    'status': 'approved 2026-10-04',
     'text': "3D wordmarks in the cells. HTML curtain: the small 'CREATIVE FOR' label only. "
             'The ten brand names are also real text in the section: read by screen readers, visible in the flat fallback.',
     'buttons': 'none',
