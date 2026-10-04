@@ -11,11 +11,11 @@ import { createCurrent } from '../../runtime/flow.js';
 const CONFIG = {
   // Real photos: tile label -> image URL (relative to this stop's folder).
   // Labels are listed in stop.json. Photo tiles without an image keep a flat placeholder;
-  // galaxy tiles show their image in one colour (the tile's tint) under the stars.
+  // galaxy (mono) tiles show their image as a soft halftone print (see GALAXY_FRAGMENT).
   images: Object.fromEntries(['hero', 'portrait', 'texture', 'landscape', 'statement', 'card', 'product', 'splash',
     'ugc', 'far_left', 'behind_hero', 'top_violet', 'top_teal', 'right_blue', 'side_strip', 'mid_violet',
     'right_teal', 'floor_teal', 'floor_streak'].map(label => [label, `media/images/${label}.jpg`])),
-  galaxyPhoto: 0.85,      // how strongly a galaxy tile's photo shows through (0 = stars only)
+  galaxyPhoto: 0.85,      // > 0: a mono tile shows its photo (the print look); 0 = no photo
   // Small spaced captions that ride on a tile: tile label -> [text, corner, offset in tile units].
   // The caption's left edge sits at the corner plus the offset, centred vertically on it.
   tags: {
@@ -34,6 +34,10 @@ const CONFIG = {
   parallax: 0.045,
 };
 
+// Mono tiles, styled on catalyst-growth.com's photos: a soft, muted black-and-white image
+// (cool blue-grey lights, deep blacks) under a fine halftone screen, with teal fringes where
+// shadow meets light (like a slightly misregistered print), a violet haze in some soft areas
+// and faint coloured grain in the blacks.
 const GALAXY_FRAGMENT = /* glsl */`
 uniform vec3 uTint; uniform vec3 uBright; uniform vec2 uSize; uniform vec2 uPointer; uniform float uTime;
 uniform sampler2D uPhoto; uniform float uPhotoMix;
@@ -44,23 +48,36 @@ float noise(vec2 p) {
   vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
   return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
 }
+float lumAt(vec2 uv, float blur) {
+  return uPhotoMix > 0.0 ? dot(texture2D(uPhoto, clamp(uv, 0.001, 0.999), blur).rgb, vec3(0.2126, 0.7152, 0.0722)) : 0.05;
+}
 void main() {
   vec2 p = vUv * uSize;
-  float cloud = noise(p * 1.3 + 7.0) * 0.6 + noise(p * 3.4 + uTime * 0.03) * 0.4;
-  vec3 col = mix(uTint * 0.05, uTint * 0.5, smoothstep(0.25, 0.85, cloud));
-  if (uPhotoMix > 0.0) {                     // one-colour photo: shadows -> deep tint, highlights -> bright tint
-    float l = sqrt(dot(texture2D(uPhoto, vUv).rgb, vec3(0.2126, 0.7152, 0.0722)));
-    vec3 duo = mix(uTint * 0.03, mix(uTint * 0.55, uBright * 0.8, l), smoothstep(0.05, 0.75, l));
-    col = mix(col, duo * (0.85 + 0.3 * cloud), uPhotoMix);
-  }
-  vec2 g = p * 26.0, id = floor(g), f = fract(g) - 0.5;
-  float h = hash(id);
-  vec2 o = (vec2(hash(id + 3.1), hash(id + 7.7)) - 0.5) * 0.6;
-  float twinkle = 0.6 + 0.4 * sin(uTime * (0.6 + h * 1.8) + h * 40.0);
-  float star = smoothstep(0.17, 0.0, length(f - o)) * step(0.45, h) * twinkle;
+  float t = smoothstep(0.03, 0.85, lumAt(vUv, 0.0));
+  // misregistration: the image, softened, sampled a little to each side
+  vec2 shift = vec2(0.014, 0.008) * (1.6 / max(uSize.x, uSize.y));
+  float ahead = smoothstep(0.03, 0.85, lumAt(vUv + shift, 2.5)), behind = smoothstep(0.03, 0.85, lumAt(vUv - shift, 2.5));
+  // halftone (45 degrees), blended with the plain tone so it stays soft. Anti-aliased to one
+  // screen pixel, and faded out where a cell would be under ~4 pixels (it would alias into moire).
+  vec2 h = mat2(0.7071, -0.7071, 0.7071, 0.7071) * p * 48.0;
+  float cellsPerPixel = length(fwidth(h));
+  float r = sqrt(t) * 0.6, aa = max(cellsPerPixel, 0.02);
+  float dots = 1.0 - smoothstep(r - aa, r + aa, length(fract(h) - 0.5));
+  float screen = 1.0 - smoothstep(0.16, 0.28, cellsPerPixel);
+  float tone = mix(t, dots, 0.3 * screen);
+  float print = mix(0.75, dots, screen);                                   // dot texture for the fringes
+  vec3 dark = vec3(0.015, 0.015, 0.02), light = vec3(0.50, 0.54, 0.58);   // sRGB: deep black, muted blue-grey
+  float haze = smoothstep(0.55, 0.85, noise(p * 0.9 + 17.0));             // soft violet areas
+  vec3 c = mix(dark, mix(light, vec3(0.50, 0.45, 0.60), haze * 0.7), tone);
+  vec3 teal = vec3(0.08, 0.62, 0.55), violet = vec3(0.45, 0.25, 0.68);
+  c = mix(c, teal * mix(0.55, 1.0, print), clamp((ahead - t) * 2.2, 0.0, 0.85));     // fringe on one side of edges
+  c = mix(c, violet * mix(0.5, 1.0, print), clamp((behind - t) * 1.6, 0.0, 0.6));    // and violet on the other
+  vec2 px = floor(gl_FragCoord.xy / 1.5);                                  // grain in screen pixels: never aliases
+  float grain = hash(px + floor(uTime * 10.0) * 17.0);
+  c += mix(violet, teal, hash(px + 5.0)) * step(0.92, grain) * (1.0 - t) * 0.3;   // faint coloured grain in the blacks
+  vec3 col = pow(c, vec3(2.2));
   vec2 d = p - uPointer;
-  float glow = exp(-dot(d, d) / 0.45);
-  col += uBright * star * (0.9 + 2.2 * glow) + uTint * glow * 0.22;
+  col += uBright * exp(-dot(d, d) / 0.45) * 0.12;                         // the cursor still lights it a little
   gl_FragColor = vec4(toGrey(col), 1.0);
   #include <colorspace_fragment>
 }`;
