@@ -23,12 +23,12 @@
   "travel": 8.0
  },
  "brief": {
-  "status": "graybox approved 2026-10-04; detail pass in progress",
+  "status": "approved 2026-10-05",
   "route": "Landing section 13 'Creative cycle' is stop 04; landing sections 03-12 are skipped for now (may be added later).",
-  "text": "All HTML except the mark: the title 'Creative cycle', the four rows (01 Strategy. 02 Testing. 03 Iteration. 04 Scale.) and the four stage labels on the ring. No section label (no '13 \u2014 Creative cycle'). The whole section fits one viewport: ring on the left, list on the right.",
+  "text": "HTML: the title 'Creative cycle' and the four rows (01 Strategy. 02 Testing. 03 Iteration. 04 Scale.). 3D: the four stage labels on the ring (they follow the turning ring, facing the camera) and the list's lines and underlines (changed 2026-10-04: only the text goes up with the curtain). No section label (no '13 \u2014 Creative cycle'). The whole section fits one viewport: ring on the left, list on the right.",
   "buttons": "The four list rows (HTML). The stage spheres on the ring are not buttons.",
   "button_behaviour": "As the landing page: the active row's text turns white and moves 12 px right, its number turns teal, and a violet-blue-teal underline grows across it. Hover or click moves the signal to that stage and holds it there; leaving lets the cycle carry on. As the camera arrives and leaves: like the hero (HTML on the section, which scrolls with the curtain).",
-  "scene_behaviour": "Idle: the signal sphere and its trail go round the ring clockwise like the landing (1.8 s per stage, eased settle at each stage); the stage it reaches lights in its colour (#9B6BC4, #6F9CC6, #3FA9B8, #2FC4BA) with a glow. Cursor: only the Catalyst mark tilts and lifts a little; the ring does not. The current parts around the cursor (same at every stop). Arrives frozen and black and white; colour and motion once live.",
+  "scene_behaviour": "The ring turns slowly on its vertical axis (one turn in 30 s; changed 2026-10-04). Idle: the signal sphere and its trail go round the ring clockwise like the landing (1.8 s per stage, eased settle at each stage); the stage it reaches lights in its colour (#9B6BC4, #6F9CC6, #3FA9B8, #2FC4BA) with a glow. Cursor: only the Catalyst mark tilts and lifts a little; the ring does not. The current parts around the cursor (same at every stop). Arrives frozen and black and white; colour and motion once live.",
   "current": "Arrives from below, goes around the outside of the ring and leaves through the left of the screen.",
   "media": "The Catalyst mark from the site (the landing's CycleCore SVG) in 3D, with its violet-blue-cyan glowing core. Ring, stage dots (spheres), signal, trail and glows built in 3D.",
   "transition_in": "tilt up, same move as before (half circle radius 8, 60 degrees, travel 8)"
@@ -92,6 +92,7 @@
   "trail_deg": 140,
   "stage_seconds": 1.8,
   "mark_width": 0.9327,
+  "mark_depth": 0.1119,
   "core_width": 0.2107
  },
  "flow": {

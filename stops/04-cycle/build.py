@@ -1,6 +1,6 @@
-"""Stop 04, the creative cycle (landing section 13) - graybox pass (Blender 4.5 LTS, CPU render).
+"""Stop 04, the creative cycle (landing section 13) (Blender 4.5 LTS, CPU render).
 
-Graybox: the cycle ring on the left of the frame (a thin ring with a faint disc), the four
+The cycle ring on the left of the frame (a thin ring with a faint disc), the four
 stage spheres (Strategy top, Testing right, Iteration bottom, Scale left), the signal
 sphere and its trail arc, and the Catalyst mark in the centre (extruded from core.svg,
 the landing's CycleCore outline) with its glowing core square. All text is HTML (title,
@@ -10,7 +10,7 @@ Run:
   /Applications/Blender.app/Contents/MacOS/Blender --background --python stops/04-cycle/build.py
 Outputs beside this file:
   poster.jpg, stop.blend     preview render (also the fallback poster) and editable scene
-  stop.glb                   ring, disc, stage spheres, signal, trail, mark and core
+  stop.glb                   the mark, and the disc (for the route's clearance check)
   flow.bin                   current particles (float32 x 11, see tools/flow_common.py)
   stop.json                  contract: rest camera, how the route enters, brief, ring, flow
 """
@@ -25,19 +25,22 @@ SEED = 41
 
 # What was agreed for this stop (the five content questions), kept in stop.json.
 BRIEF = {
-    'status': 'graybox approved 2026-10-04; detail pass in progress',
+    'status': 'approved 2026-10-05',
     'route': "Landing section 13 'Creative cycle' is stop 04; landing sections 03-12 are skipped for now "
              '(may be added later).',
-    'text': "All HTML except the mark: the title 'Creative cycle', the four rows (01 Strategy. 02 Testing. "
-            "03 Iteration. 04 Scale.) and the four stage labels on the ring. No section label (no "
-            "'13 — Creative cycle'). The whole section fits one viewport: ring on the left, list on the right.",
+    'text': "HTML: the title 'Creative cycle' and the four rows (01 Strategy. 02 Testing. 03 Iteration. "
+            "04 Scale.). 3D: the four stage labels on the ring (they follow the turning ring, facing the camera) "
+            "and the list's lines and underlines (changed 2026-10-04: only the text goes up with the curtain). "
+            "No section label (no '13 — Creative cycle'). The whole section fits one viewport: ring on the "
+            "left, list on the right.",
     'buttons': 'The four list rows (HTML). The stage spheres on the ring are not buttons.',
     'button_behaviour': "As the landing page: the active row's text turns white and moves 12 px right, its "
                         'number turns teal, and a violet-blue-teal underline grows across it. Hover or click '
                         'moves the signal to that stage and holds it there; leaving lets the cycle carry on. '
                         'As the camera arrives and leaves: like the hero (HTML on the section, which scrolls '
                         'with the curtain).',
-    'scene_behaviour': 'Idle: the signal sphere and its trail go round the ring clockwise like the landing '
+    'scene_behaviour': 'The ring turns slowly on its vertical axis (one turn in 30 s; changed 2026-10-04). '
+                       'Idle: the signal sphere and its trail go round the ring clockwise like the landing '
                        '(1.8 s per stage, eased settle at each stage); the stage it reaches lights in its colour '
                        '(#9B6BC4, #6F9CC6, #3FA9B8, #2FC4BA) with a glow. Cursor: only the Catalyst mark tilts '
                        'and lifts a little; the ring does not. The current parts around the cursor (same at '
@@ -73,7 +76,9 @@ FLOW = {'particles': 9000, 'width': 0.196, 'fibres': 34, 'speed': 0.48, 'twist':
 CURRENT_RADIUS = 1.45          # path radius / ring radius
 PARTICLE_RADIUS = 0.0055
 
-GREYS = {'Ring': 0.05, 'Disc': 0.0015, 'Stage': 0.12, 'Signal': 1.0, 'Trail': 0.25, 'Mark': 0.75, 'Core': 0.2}
+# Poster colours (linear): the browser draws these with its own shaders (stop.js)
+COLORS = {'Ring': (0.0168,) * 3, 'Disc': (0.0012, 0.0008, 0.002), 'Stage': (0.03, 0.03, 0.03), 'Signal': (1.0, 1.0, 1.0),
+          'Trail': (0.16, 0.48, 0.46), 'Mark': (0.68, 0.68, 0.68), 'Core': (0.12, 0.08, 0.3), 'Active': (0.33, 0.15, 0.55)}
 
 
 def hex_rgb(h):
@@ -142,7 +147,7 @@ def plane(name, width, height, material):
 px = FRAME_H * REST_DEPTH / FRAME[1]                       # one frame pixel, in scene units
 centre = screen_point(*RING_CENTRE, REST_DEPTH)
 radius = RING_RADIUS * FRAME_H * REST_DEPTH
-mats = {name: emission(name, (g, g, g)) for name, g in GREYS.items()}
+mats = {name: emission(name, rgb) for name, rgb in COLORS.items()}
 objects = []
 
 
@@ -197,7 +202,7 @@ objects.append(disc)
 stages = []
 for i, label in enumerate(STAGES):
     p = on_ring(i * 90)
-    objects.append(sphere(f'Stage_{i}', p, STAGE_PX * px / 2, mats['Stage']))
+    objects.append(sphere(f'Stage_{i}', p, STAGE_PX * px / 2, mats['Active' if i == 0 else 'Stage']))
     stages.append({'label': label, 'deg': i * 90, 'color': STAGE_COLORS[i], 'centre': y_up(p)})
 objects.append(sphere('Signal', on_ring(SIGNAL_DEG), SIGNAL_PX * px / 2, mats['Signal']))
 objects.append(torus('Trail', radius, RING_PX * px * 0.9, mats['Trail'], arc_deg=TRAIL_DEG, start_deg=SIGNAL_DEG - TRAIL_DEG))
@@ -223,6 +228,7 @@ scale = mark_w / width_now
 mark.data.extrude = MARK_DEPTH * mark_w / scale / 2
 mark.data.dimensions = '2D'
 mark.data.fill_mode = 'BOTH'
+mark.data.resolution_u = 5                                 # enough for the mark's rounded corners
 mark.scale = (scale, scale, scale)
 mark.rotation_euler = (math.radians(90), 0, 0)             # SVG plane (XY) -> facing the camera (XZ)
 mark.location = centre
@@ -238,7 +244,8 @@ objects.append(core)
 
 ring = {'centre': y_up(centre), 'radius': round(radius, 4), 'px': round(px, 6), 'frame_centre': list(RING_CENTRE),
         'radius_share_of_height': RING_RADIUS, 'stages': stages, 'signal_deg': SIGNAL_DEG, 'trail_deg': TRAIL_DEG,
-        'stage_seconds': 1.8, 'mark_width': round(mark_w, 4), 'core_width': round(CORE_SHARE * mark_w, 4)}
+        'stage_seconds': 1.8, 'mark_width': round(mark_w, 4), 'mark_depth': round(MARK_DEPTH * mark_w, 4),
+        'core_width': round(CORE_SHARE * mark_w, 4)}
 
 # Current path: in from below (off screen); seen from the camera it climbs the right side,
 # crosses over the top and runs down the left, then turns out through the left edge of the screen.
@@ -300,7 +307,7 @@ bpy.ops.render.render(write_still=True)
 
 # ---- Browser export ---------------------------------------------------------------
 bpy.ops.object.select_all(action='DESELECT')
-for ob in objects:
+for ob in (mark, disc):            # the browser builds the ring, spheres and glows from stop.json
     ob.select_set(True)
 bpy.ops.export_scene.gltf(filepath=str(OUT / 'stop.glb'), export_format='GLB', use_selection=True,
                           export_materials='NONE', export_animations=False)

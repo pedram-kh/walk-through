@@ -34,7 +34,8 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
 
   const loader = new StopLoader({
     route, scene, camera,
-    makeContext: slot => ({ dir: slot.stop.dir, camera, overlay, pointer, invalidate: () => { dirty = true; } }),
+    makeContext: slot => ({ dir: slot.stop.dir, section: slot.stop.section, camera, overlay, pointer,
+                            invalidate: () => { dirty = true; } }),
     onLoaded: slot => {
       // A stop arrives frozen and in black and white, except the one already at rest on load.
       slot.grey = route.at(followY, { position: new THREE.Vector3(), quaternion: new THREE.Quaternion() }).rest === loader.slots.indexOf(slot) ? 0 : 1;
