@@ -29,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from flow_common import make_current
 
 ROOT = Path(__file__).resolve().parent.parent
-STOPS = ['01-hero', '02-clients', '03-problem']   # route order
+STOPS = ['01-hero', '02-clients', '03-problem', '04-cycle']   # route order
 SAMPLES = 240                              # camera samples per segment
 SPACER_SCREENS = 2.0                       # scroll length of each journey's spacer, in screen heights
 MIN_CLEARANCE = 0.8                        # closest the camera may pass to any object (tiles lift ~0.3 on hover)

@@ -94,7 +94,7 @@ Scrolling back plays them in reverse.
 | 01 | Hero | Approved scene (tile wall, dust, current). |
 | 02 | Creative for (client logos) | Its own stop, in 3D. Logo grid: Lovable, fyxer, MAGIC AI, Mozart, cleo, VIKTOR, Jack & Jill, plus Perplexity, Granola and Canva in the two empty top-left slots and the empty bottom-right slot. |
 | 03 | 02 The problem | |
-| 04 | 03 Complexity to message | |
+| 04 | 13 Creative cycle | Moved up on 2026-10-04: landing sections 03-12 are skipped for now and may be added later (the rows below keep the original plan for reference). |
 | 05 | 04 Creative translation | |
 | 06 | 05 Input: one product | |
 | 07 | Different audiences / use cases / messages | Unnumbered in the reference; may merge with 06. |
@@ -295,3 +295,4 @@ in the world, so stops never overlap.
 | 2026-10-04 | 03 | Brief recorded in stop.json; graybox approved: three rows of 5 upright cards turned 25 degrees in a checkerboard zigzag (toward / away from the screen), all text in HTML around them and the whole section in one viewport; current enters from the right, goes around the cards in two strands and leaves through the top-right; turn left 60 degrees from stop 02. Journey currents now stay out of the next stop's arrival view when its current starts off screen | not measured | not measured | 0.85 MB (graybox, + journey current 0.52 MB) |
 | 2026-10-04 | 03 | Detail + behaviour built: card faces from the catalyst-growth.com photos (stop 01 set) with the landing's hairline border and label chip in one texture (cards.jpg, atlas.py); 6 cards per row in the drift loop (5 on screen), drifting like the landing (rows 1 and 3 right, row 2 left), fading per pixel at the row ends and wrapping off screen so the checkerboard holds; hero-style tilt and lift near the cursor; the landing's violet-to-blue motion trail behind each row; colour when live. 5 draw calls for the stop. Awaiting approval | not measured (preview pane) | not measured | 1.3 MB (+ journey current 0.52 MB) |
 | 2026-10-04 | 03 | Stop 03 approved ('02 — The problem' label removed at your request) | not measured | not measured | 1.3 MB |
+| 2026-10-04 | 04 | Brief recorded in stop.json (landing section 13, Creative cycle, as stop 04; sections 03-12 skipped for now). Graybox built: ring on the left with stage spheres, signal, trail and the extruded Catalyst mark; title, rows and stage labels in HTML; current from below, around the ring, out to the left; turn up 60 degrees from stop 03 (closest pass 4.7 units). Graybox approved | not measured | not measured | |

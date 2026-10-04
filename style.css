@@ -106,6 +106,31 @@ html:not(.route) .s-clients { background-image: none; }     /* the list is the g
   font-size: clamp(18px, 1.5vw, 28px); line-height: 1.35; }      /* one line, right edge on the cards' right edge */
 .problem-equation .eq { color: #75d3dd; }      /* oklch(0.8 0.12 200), the landing page's teal */
 
+/* ---- Section 04, the creative cycle: ring, spheres and mark are 3D; title, rows and stage labels are HTML ---- */
+.s-cycle { --ring-x: calc(50% + (28.5% - 50%) * var(--fit-x, 1)); --ring-r: calc(29svh * var(--fit-y, 1)); }
+.cycle-labels { margin: 0; padding: 0; list-style: none; }
+.cycle-labels li { position: absolute; left: var(--ring-x); top: 50%; white-space: nowrap;
+  font: 11px/1 "Geist Mono", ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: #ffffff80;
+  /* centre on the stage's dot, then 42 landing px (0.165 ring radii) further out along the radius */
+  transform: translate(-50%, -50%) translate(calc(sin(var(--a)) * var(--ring-r) * 1.165), calc(cos(var(--a)) * var(--ring-r) * -1.165)); }
+.cycle-labels li:first-child { color: #fff; }
+.cycle-list { position: absolute; left: calc(50% + (56% - 50%) * var(--fit-x, 1)); right: 7%; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: clamp(24px, 3vw, 40px); }
+.cycle-title { margin: 0; padding-top: clamp(24px, 2.6vw, 48px); border-top: 1px solid #ffffff24; font-weight: 300;
+  font-size: clamp(32px, 4.6vw, 88px); line-height: .9; letter-spacing: -.05em; text-transform: uppercase; }
+.cycle-rows { margin: 0; padding: 0; list-style: none; }
+.cycle-rows button { display: flex; align-items: baseline; gap: 20px; width: 100%; padding: clamp(14px, 1.3vw, 22px) 0;
+  font: inherit; color: #ffffff80; text-align: left; background: none; border: 0; cursor: pointer;
+  background-image: linear-gradient(90deg, #7B4099, #5481A9, #009992), linear-gradient(#ffffff24, #ffffff24);
+  background-size: 0% 1px, 100% 1px; background-position: left bottom; background-repeat: no-repeat;
+  transition: background-size .5s cubic-bezier(.2, .8, .2, 1); }
+.cycle-rows .num { font: 12px/1 "Geist Mono", ui-monospace, Menlo, monospace; transition: color .4s; }
+.cycle-rows .name { font-weight: 300; font-size: clamp(28px, 2.4vw, 44px); line-height: 1; letter-spacing: -.03em;
+  text-transform: uppercase; transition: color .4s, transform .4s; }
+.cycle-rows [aria-current] { background-size: 100% 1px, 100% 1px; }
+.cycle-rows [aria-current] .num { color: #75d3dd; }
+.cycle-rows [aria-current] .name { color: #fff; transform: translateX(12px); }
+
 /* ---- Page-level controls ---- */
 .route-dots { position: fixed; z-index: 3; left: clamp(6px, 1.2vw, 22px); top: 50%; transform: translateY(-50%);
   display: flex; flex-direction: column; gap: 6px; }
@@ -131,4 +156,8 @@ html:not(.route) .s-clients { background-image: none; }     /* the list is the g
   .problem-rows .arrow, .problem-rows .rule { display: none; }
   .problem-equation { left: var(--left); right: auto; top: auto; bottom: 4%; white-space: normal; }
   .problem-copy { top: auto; bottom: 16%; right: var(--left); }
+  .s-cycle { --ring-x: 50%; --ring-r: min(24vw, 18svh); }
+  .cycle-labels li { top: 30%; }
+  .cycle-list { left: 16px; right: 16px; top: auto; bottom: 4%; transform: none; gap: 12px; }
+  .cycle-title { padding-top: 12px; }
 }
