@@ -1,8 +1,8 @@
 """Stop 02, clients ("Creative for" logo grid) - detail pass (Blender 4.5 LTS, CPU render).
 
 The 5 x 2 grid of cells floating at slightly different depths (approved graybox),
-wordmarks set in each brand's typeface like the landing HTML (fonts/), the stop's
-current threading the grid lines, and a light dust field. Cells, hairlines and
+wordmarks set in each brand's typeface like the landing HTML (fonts/), and the
+stop's current threading the grid lines (the only particles at this stop). Cells, hairlines and
 wordmarks are each merged into one mesh with a per-vertex cell number (_CELL), so
 the browser draws the grid in three calls and lifts and lights one cell at a time.
 Run:
@@ -10,9 +10,8 @@ Run:
 Outputs beside this file:
   poster.jpg, stop.blend     preview render (also the fallback poster) and editable scene
   stop.glb                   Cells, Lines, Words: three merged meshes with UVs and a _CELL attribute
-  dust.bin                   dust points: x y z r g b size owner (float32 x 8, owner -1 = free)
   flow.bin                   current particles (float32 x 11, see tools/flow_common.py)
-  stop.json                  contract: rest camera, how the route enters, brief, cells, dust, flow
+  stop.json                  contract: rest camera, how the route enters, brief, cells, flow
 """
 import bpy, json, math, random, struct, sys
 from pathlib import Path
@@ -33,11 +32,12 @@ BRIEF = {
     'scene_behaviour': 'Cells float at slightly different depths. Idle: nothing moves. '
                        'Hover (like catalyst-growth.com logo grid): hovered cell lifts toward the camera, its wordmark goes '
                        'full white while the others dim to 50%, a thin violet-blue-teal gradient border rotates around it, '
-                       'a violet glow fades in from its top-left corner. Dust and current part around the cursor. '
+                       'a violet glow fades in from its top-left corner. The current parts around the cursor. '
                        'Monochrome apart from the hover. Arrives frozen and black and white; live once the section is on screen.',
     'current': 'Enters where the journey current from stop 01 ends, threads the grid lines, leaves on the left '
                '(the next transition tilts left).',
     'media': 'the ten wordmarks only',
+    'particles': 'only the current; no dust (changed 2026-10-04)',
     'wordmarks': 'Typed in Google fonts like the landing HTML; new: Perplexity (Inter Tight 500, lowercase), '
                  'Granola (Fraunces 500), Canva (Pacifico).',
 }
@@ -101,7 +101,7 @@ CURRENT_PATH = [
 ]
 FLOW = {'particles': 7000, 'width': 0.196, 'fibres': 34, 'speed': 0.48, 'twist': 9.0, 'samples': 200,
         'color': ('#a4a4aa', '#e2e2e6')}
-DUST = {'count': 2600, 'radius': 0.0055, 'color': ('#9a9aa0', '#d0d0d4')}
+PARTICLE_RADIUS = 0.0055     # current particle size, as at stop 01
 
 CELL_COLOR = (0.006, 0.006, 0.008)
 LINE_COLOR = (0.07, 0.07, 0.075)
@@ -204,24 +204,13 @@ for row, names in enumerate(BRANDS):
         cells.append({'name': name, 'word': word.name, 'brand': brand, 'row': row, 'col': col, 'centre': y_up(centre),
                       'depth': round(depth, 3), 'width': round(w, 4), 'height': round(h, 4)})
 
-# ---- Dust: a light free field around the grid ----------------------------------
-dust_rows, dust_points, dust_colors, dust_sizes = [], [], [], []
-base, bright = hex_rgb(DUST['color'][0]), hex_rgb(DUST['color'][1])
-for _ in range(DUST['count']):
-    p = screen_point(random.uniform(-0.05, 1.05), random.gauss(0.52, 0.16), random.uniform(8.0, 15.0))
-    mix, gain = random.random() ** 2, random.uniform(0.35, 1.6)
-    color = [gain * (b * (1 - mix) + br * mix) for b, br in zip(base, bright)]
-    size = DUST['radius'] * random.uniform(0.45, 1.5)
-    dust_rows.append((*y_up(p), *color, size, -1))
-    dust_points.append(p); dust_colors.append((*color, 1)); dust_sizes.append(size)
-
 # ---- Current ----------------------------------------------------------------------
 flow_paths_v, flow_rows, still = make_current(
     [([screen_point(x, y, d) for x, y, d in CURRENT_PATH], FLOW['particles'], FLOW['width'], FLOW['fibres'], FLOW['speed'])],
     facing=target - camera.location, samples=FLOW['samples'], amount=1.0, twist=FLOW['twist'],
-    base=hex_rgb(FLOW['color'][0]), bright=hex_rgb(FLOW['color'][1]), radius=DUST['radius'])
+    base=hex_rgb(FLOW['color'][0]), bright=hex_rgb(FLOW['color'][1]), radius=PARTICLE_RADIUS)
 
-# Points for the preview render: dust and current as small glowing spheres.
+# Points for the preview render: the current as small glowing spheres.
 point_mat = emission('Point glow', (1, 1, 1), 2.2)
 attr = point_mat.node_tree.nodes.new('ShaderNodeAttribute')
 attr.attribute_name = 'dust_color'
@@ -239,8 +228,7 @@ group.links.new(g_in.outputs[0], to_points.inputs['Mesh'])
 group.links.new(radius.outputs['Attribute'], to_points.inputs['Radius'])
 group.links.new(to_points.outputs['Points'], set_mat.inputs['Geometry'])
 group.links.new(set_mat.outputs['Geometry'], g_out.inputs[0])
-for label, pts, cols, sizes in (('Dust', dust_points, dust_colors, dust_sizes),
-                                ('Current', [p for p, _, _ in still], [c for _, c, _ in still], [z for _, _, z in still])):
+for label, pts, cols, sizes in (('Current', [p for p, _, _ in still], [c for _, c, _ in still], [z for _, _, z in still]),):
     mesh = bpy.data.meshes.new(label)
     mesh.from_pydata(pts, [], [])
     mesh.attributes.new('dust_color', 'FLOAT_COLOR', 'POINT').data.foreach_set('color', [c for rgba in cols for c in rgba])
@@ -290,9 +278,6 @@ for ob in merged:
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)   # vertices in the stop's own frame
 bpy.ops.export_scene.gltf(filepath=str(OUT / 'stop.glb'), export_format='GLB', use_selection=True,
                           export_materials='NONE', export_animations=False, export_attributes=True)
-with open(OUT / 'dust.bin', 'wb') as f:
-    for row in dust_rows:
-        f.write(struct.pack('<8f', *row))
 with open(OUT / 'flow.bin', 'wb') as f:
     for row in flow_rows:
         f.write(struct.pack('<11f', *row))
@@ -309,8 +294,6 @@ q = (Y_UP @ camera.matrix_world.to_3x3()).to_quaternion()
     'brief': BRIEF,
     'colors': {'cell': CELL_COLOR, 'line': LINE_COLOR, 'word': WORD_COLOR},
     'cells': cells,
-    'dust': {'file': 'dust.bin', 'count': len(dust_rows), 'floats_per_point': 8,
-             'layout': ['x', 'y', 'z', 'r', 'g', 'b', 'size', 'owner_tile_index_or_-1']},
     'flow': {'file': 'flow.bin', 'count': len(flow_rows), 'floats_per_point': 11,
              'layout': ['path', 't', 'radius', 'angle', 'jitter_n', 'jitter_b', 'size', 'r', 'g', 'b', 'seed'],
              'samples': FLOW['samples'], 'twist': FLOW['twist'],
@@ -318,4 +301,4 @@ q = (Y_UP @ camera.matrix_world.to_3x3()).to_quaternion()
                         'normals': [y_up(v) for v in p['normals']], 'binormals': [y_up(v) for v in p['binormals']]}
                        for p in flow_paths_v]},
 }, indent=1))
-print(f'STOP_DONE 02-clients cells={len(cells)} dust={len(dust_rows)} flow={len(flow_rows)}')
+print(f'STOP_DONE 02-clients cells={len(cells)} flow={len(flow_rows)}')

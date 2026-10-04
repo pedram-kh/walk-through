@@ -3,12 +3,12 @@
 // call each covers all ten cells and the shaders light and lift one cell at a time.
 // Hover, like the catalyst-growth.com logo grid: the cell lifts toward the camera, a violet
 // glow fades in from its top-left corner, its hairlines turn into a rotating violet-blue-teal
-// gradient, its wordmark goes full white and the other wordmarks dim. Dust and the current
-// part around the cursor, as at stop 01. Monochrome apart from the hover.
+// gradient, its wordmark goes full white and the other wordmarks dim. The current (the only
+// particles here) parts around the cursor, as at stop 01. Monochrome apart from the hover.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GREY_GLSL } from '../../runtime/materials.js';
-import { DUST_VERTEX, POINT_FRAGMENT, createCurrent } from '../../runtime/flow.js';
+import { createCurrent } from '../../runtime/flow.js';
 
 const CONFIG = {
   lift: 0.35,                 // how far the hovered cell rises toward the camera (scene units)
@@ -17,7 +17,7 @@ const CONFIG = {
   turnSeconds: 2,             // the border gradient's rotation while hovered (the site's 2 s)
   wordRest: 0.72, wordHover: 1, wordDim: 0.36,   // wordmark brightness: normal, hovered, others while one is hovered
   glow: 0.4,                  // violet glow strength at the corner (the site's 40%)
-  dust: { radius: 1.25, push: 0.6, swirl: 0.45, trail: 0.35, sizeBoost: 1.9, drift: 0.035 },
+  current: { radius: 1.25, push: 0.6, swirl: 0.45, trail: 0.35, sizeBoost: 1.9 },   // cursor parting, as at stop 01
 };
 
 // The site's gradient: violet hsl(280,41%,43%), blue hsl(208,34%,50%), teal hsl(177,100%,30%),
@@ -97,9 +97,8 @@ export async function load(ctx) {
     if (!response.ok) throw Error('Missing stop 02 asset: ' + file);
     return response[kind]();
   };
-  const [contract, gltf, dustBuffer, flowBuffer] = await Promise.all([
-    fetchAs('stop.json', 'json'), new GLTFLoader().loadAsync(ctx.dir + 'stop.glb'),
-    fetchAs('dust.bin', 'arrayBuffer'), fetchAs('flow.bin', 'arrayBuffer'),
+  const [contract, gltf, flowBuffer] = await Promise.all([
+    fetchAs('stop.json', 'json'), new GLTFLoader().loadAsync(ctx.dir + 'stop.glb'), fetchAs('flow.bin', 'arrayBuffer'),
   ]);
   const { camera } = ctx;
   const cells = contract.cells;
@@ -130,37 +129,14 @@ export async function load(ctx) {
     group.add(mesh);
   }
 
-  // ---- Dust and current, parted by the cursor ------------------------------------
+  // ---- The current, parted by the cursor -----------------------------------------
   const pointerUniforms = {
     uTime: time, uScale: { value: 1 }, uActive: { value: 0 },
-    uRadius: { value: CONFIG.dust.radius }, uPush: { value: CONFIG.dust.push }, uSwirl: { value: CONFIG.dust.swirl },
-    uTrail: { value: CONFIG.dust.trail }, uSizeBoost: { value: CONFIG.dust.sizeBoost }, uDrift: { value: CONFIG.dust.drift },
+    uRadius: { value: CONFIG.current.radius }, uPush: { value: CONFIG.current.push }, uSwirl: { value: CONFIG.current.swirl },
+    uTrail: { value: CONFIG.current.trail }, uSizeBoost: { value: CONFIG.current.sizeBoost }, uDrift: { value: 0 },
     uRayO: { value: new THREE.Vector3() }, uRayD: { value: new THREE.Vector3(0, 0, -1) },
     uTrailO: { value: new THREE.Vector3() }, uTrailD: { value: new THREE.Vector3(0, 0, -1) },
   };
-  const raw = new Float32Array(dustBuffer), stride = contract.dust.floats_per_point, dustCount = contract.dust.count;
-  if (raw.length !== dustCount * stride) throw Error('dust.bin does not match stop.json');
-  const positions = new Float32Array(dustCount * 3), colors = new Float32Array(dustCount * 3);
-  const sizes = new Float32Array(dustCount), seeds = new Float32Array(dustCount);
-  for (let i = 0; i < dustCount; i++) {
-    const k = i * stride;
-    positions.set([raw[k], raw[k + 1], raw[k + 2]], i * 3);
-    colors.set([raw[k + 3], raw[k + 4], raw[k + 5]], i * 3);
-    sizes[i] = raw[k + 6];
-    seeds[i] = ((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1;
-  }
-  const dustGeometry = new THREE.BufferGeometry();
-  dustGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  dustGeometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
-  dustGeometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
-  dustGeometry.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1));
-  const dustMaterial = new THREE.ShaderMaterial({
-    uniforms: pointerUniforms, vertexShader: DUST_VERTEX, fragmentShader: POINT_FRAGMENT,
-    blending: THREE.AdditiveBlending, depthWrite: false, transparent: true,
-  });
-  const dust = new THREE.Points(dustGeometry, dustMaterial);
-  dust.frustumCulled = false;
-  group.add(dust);
   const current = createCurrent(contract.flow, flowBuffer, pointerUniforms);
   group.add(current.points);
 
@@ -215,12 +191,12 @@ export async function load(ctx) {
   let frozen = true;
   return {
     group,
-    counts: { cells: count, dust: dustCount, flow: contract.flow.count },
+    counts: { cells: count, flow: contract.flow.count },
     setFrozen(value) { frozen = value; },
     setGrey(value) { grey.value = value; },
     setVisible() {},
     resize({ pixelScale }) { pointerUniforms.uScale.value = pixelScale; },
-    // While live the current and dust flow every frame.
+    // While live the current flows every frame.
     update(dt) {
       if (frozen) return false;
       animate(dt);
@@ -229,7 +205,7 @@ export async function load(ctx) {
     dispose() {
       group.traverse(o => o.geometry?.dispose());
       Object.values(materials).forEach(m => m.dispose());
-      dustMaterial.dispose(); current.dispose();
+      current.dispose();
     },
   };
 }

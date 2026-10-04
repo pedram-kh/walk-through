@@ -285,3 +285,4 @@ in the world, so stops never overlap.
 | 2026-10-03 | 01 to 02 | Frame rate judged OK by eye on the test Mac; no ?bench numbers yet | OK (by eye) | OK (by eye) | |
 | 2026-10-04 | 02 | Brief recorded in stop.json; graybox approved (5 x 2 grid at varied depths, current threads the middle line and leaves left, journey current hands over to it) | not measured | not measured | 0.7 MB (graybox) |
 | 2026-10-04 | 02 | Detail + behaviour built: wordmarks in their real fonts, grid merged to 3 draw calls (5 for the stop, 15.5k triangles), hover like catalyst-growth.com (lift, corner glow, rotating gradient border, wordmark brighten/dim), dust and current part around the cursor; flat page shows the brands as a list. Awaiting approval | not measured (preview pane) | not measured | 1.59 MB (+ journey current 0.49 MB) |
+| 2026-10-04 | 02 | Dust removed at your request: the current is the only particles at stop 02 | 60 (preview, at rest) | not measured | 1.51 MB |

@@ -27,9 +27,10 @@
   "text": "3D wordmarks in the cells. HTML curtain: the small 'CREATIVE FOR' label only. The ten brand names are also real text in the section: read by screen readers, visible in the flat fallback.",
   "buttons": "none",
   "button_behaviour": "n/a",
-  "scene_behaviour": "Cells float at slightly different depths. Idle: nothing moves. Hover (like catalyst-growth.com logo grid): hovered cell lifts toward the camera, its wordmark goes full white while the others dim to 50%, a thin violet-blue-teal gradient border rotates around it, a violet glow fades in from its top-left corner. Dust and current part around the cursor. Monochrome apart from the hover. Arrives frozen and black and white; live once the section is on screen.",
+  "scene_behaviour": "Cells float at slightly different depths. Idle: nothing moves. Hover (like catalyst-growth.com logo grid): hovered cell lifts toward the camera, its wordmark goes full white while the others dim to 50%, a thin violet-blue-teal gradient border rotates around it, a violet glow fades in from its top-left corner. The current parts around the cursor. Monochrome apart from the hover. Arrives frozen and black and white; live once the section is on screen.",
   "current": "Enters where the journey current from stop 01 ends, threads the grid lines, leaves on the left (the next transition tilts left).",
   "media": "the ten wordmarks only",
+  "particles": "only the current; no dust (changed 2026-10-04)",
   "wordmarks": "Typed in Google fonts like the landing HTML; new: Perplexity (Inter Tight 500, lowercase), Granola (Fraunces 500), Canva (Pacifico)."
  },
  "colors": {
@@ -201,21 +202,6 @@
    "height": 0.9623
   }
  ],
- "dust": {
-  "file": "dust.bin",
-  "count": 2600,
-  "floats_per_point": 8,
-  "layout": [
-   "x",
-   "y",
-   "z",
-   "r",
-   "g",
-   "b",
-   "size",
-   "owner_tile_index_or_-1"
-  ]
- },
  "flow": {
   "file": "flow.bin",
   "count": 7000,
