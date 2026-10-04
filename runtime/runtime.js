@@ -10,6 +10,7 @@ import { createCurrent, stillPointerUniforms } from './flow.js';
 
 const MAX_PIXEL_RATIO = 1.5;
 const GREY_SECONDS = 0.5;          // colour <-> black and white fade
+const FOLLOW_SECONDS = 0.12;       // the camera glides toward the scroll position (smooths wheel steps)
 
 export async function startRoute({ stage, overlay, isPaused, onFailure }) {
   const routeData = await fetch('route.json').then(r => { if (!r.ok) throw Error('Missing route.json'); return r.json(); });
@@ -28,6 +29,7 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
     target.addEventListener(type, fn, options);
     cleanup.push(() => target.removeEventListener(type, fn, options));
   };
+  let followY = scrollY;
   let disposed = false, raf = 0, dirty = true, size = { width: 1, height: 1, pixelScale: 1 }, quality = MAX_PIXEL_RATIO;
 
   const loader = new StopLoader({
@@ -35,7 +37,7 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
     makeContext: slot => ({ dir: slot.stop.dir, camera, overlay, pointer, invalidate: () => { dirty = true; } }),
     onLoaded: slot => {
       // A stop arrives frozen and in black and white, except the one already at rest on load.
-      slot.grey = route.at(scrollY, { position: new THREE.Vector3(), quaternion: new THREE.Quaternion() }).rest === loader.slots.indexOf(slot) ? 0 : 1;
+      slot.grey = route.at(followY, { position: new THREE.Vector3(), quaternion: new THREE.Quaternion() }).rest === loader.slots.indexOf(slot) ? 0 : 1;
       slot.frozen = true;
       slot.module.setGrey(slot.grey);
       slot.module.resize(size);
@@ -108,12 +110,17 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
   const lastPose = { position: new THREE.Vector3(1e9), quaternion: new THREE.Quaternion() };
   const diagnostics = { fps: 0, phase: '', stop: 0, live: -1, progress: 0, drawCalls: 0, triangles: 0, points: 0, pixelRatio: 0, loaded: [] };
   let last = performance.now(), streak = 0, streakTime = 0, slowFor = 0;
+  // followY trails the real scroll position, so each wheel notch becomes a short glide.
+  // The page itself scrolls natively; only the camera (and the phases) use followY.
 
   function frame(now) {
     raf = requestAnimationFrame(frame);
     const wall = (now - last) / 1000, dt = Math.min(wall, 0.05);
     last = now;
-    const state = route.at(scrollY, pose);
+    const gap = scrollY - followY;
+    followY = Math.abs(gap) < 0.5 ? scrollY : followY + gap * (1 - Math.exp(-dt / FOLLOW_SECONDS));
+    if (followY !== scrollY) dirty = true;
+    const state = route.at(followY, pose);
     dots.setCurrent(state.stop);
     loader.focus(state.stop);
     const paused = isPaused() || document.hidden;

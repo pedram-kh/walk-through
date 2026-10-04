@@ -30,8 +30,8 @@ from flow_common import make_current
 
 ROOT = Path(__file__).resolve().parent.parent
 STOPS = ['01-hero', '02-clients']          # route order
-SAMPLES = 120                              # camera samples per segment
-SPACER_SCREENS = 3.0                       # scroll length of each journey, in screen heights
+SAMPLES = 240                              # camera samples per segment
+SPACER_SCREENS = 2.0                       # scroll length of each journey's spacer, in screen heights
 MIN_CLEARANCE = 0.8                        # closest the camera may pass to any object (tiles lift ~0.3 on hover)
 
 # Journey current (matches stop 01's current: width, fibres, speed, twist, colour)

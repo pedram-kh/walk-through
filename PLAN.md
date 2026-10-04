@@ -74,6 +74,10 @@ Scrolling back plays them in reverse.
   freezes when scrolling starts and flows only while a neighbouring stop is live.
   Each new stop's brief includes where the current enters and leaves it.
 - The nav bar is fixed at the top at all times; it is not part of any curtain.
+- The camera follows the scroll with a short glide (`FOLLOW_SECONDS` in
+  `runtime/runtime.js`, 0.12 s), so wheel steps don't jump; the page itself
+  scrolls natively. Each journey's spacer is 2 screens (`SPACER_SCREENS` in
+  `tools/build_route.py`), with 240 camera samples per journey (decided 2026-10-04).
 - Implementation: the flat page stays real HTML in normal document flow, one
   block per section. Between sections sits an empty spacer whose height is the
   camera journey. While a spacer fills the screen (phase D) the scroll position
@@ -286,3 +290,4 @@ in the world, so stops never overlap.
 | 2026-10-04 | 02 | Brief recorded in stop.json; graybox approved (5 x 2 grid at varied depths, current threads the middle line and leaves left, journey current hands over to it) | not measured | not measured | 0.7 MB (graybox) |
 | 2026-10-04 | 02 | Detail + behaviour built: wordmarks in their real fonts, grid merged to 3 draw calls (5 for the stop, 15.5k triangles), hover like catalyst-growth.com (lift, corner glow, rotating gradient border, wordmark brighten/dim), dust and current part around the cursor; flat page shows the brands as a list. Awaiting approval | not measured (preview pane) | not measured | 1.59 MB (+ journey current 0.49 MB) |
 | 2026-10-04 | 02 | Dust removed at your request: the current is the only particles at stop 02 | 60 (preview, at rest) | not measured | 1.51 MB |
+| 2026-10-04 | 01 to 02 | Smoother, shorter scrolling: camera glides after the scroll (0.12 s), journeys 3 -> 2 screens (page 5 -> 4 screens so far), camera path 120 -> 240 samples | not measured | not measured | |
