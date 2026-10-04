@@ -11,7 +11,9 @@ import { GREY_GLSL } from '../../runtime/materials.js';
 import { createCurrent } from '../../runtime/flow.js';
 
 const CONFIG = {
-  lift: 0.15,                 // how far the hovered cell rises toward the camera (scene units)
+  lift: 0.4,                  // how far the hovered cell rises toward the camera (scene units)
+  // The cells float at different depths, so a hovered cell can sit behind a nearer neighbour;
+  // while hovered it is drawn in front of all of them (fades with the hover).
   spring: { stiffness: 60, damping: 12 },
   fade: { in: 0.18, out: 0.35 },      // hover light time constants (s), like the site's 0.5 s / 0.75 s fades
   turnSeconds: 2,             // the border gradient's rotation while hovered (the site's 2 s)
@@ -38,13 +40,15 @@ vec3 sweep(float t) {               // t in 0..1 around the cell
 
 const CELL_VERTEX = /* glsl */`
 attribute float _cell;
-uniform float uLift[10];
+uniform float uLift[10]; uniform float uHover[10];
 varying vec2 vUv; varying vec3 vLocal; varying float vCell;
 void main() {
+  int c = int(_cell + 0.5);
   vCell = _cell;
   vUv = uv; vLocal = position;
-  vec3 p = position + vec3(0.0, 0.0, uLift[int(_cell + 0.5)]);
+  vec3 p = position + vec3(0.0, 0.0, uLift[c]);
   gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+  gl_Position.z -= 0.01 * uHover[c] * gl_Position.w;     // hovered cell draws in front of its neighbours
 }`;
 
 const HOVER_UNIFORMS = /* glsl */`
