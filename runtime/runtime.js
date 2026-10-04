@@ -77,6 +77,11 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
     camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(tanV));
     camera.aspect = aspect;
     camera.updateProjectionMatrix();
+    // How the 3D view scales around the screen centre compared with the design frame, so HTML
+    // that lines up with 3D objects can follow: left: calc(50% + (X - 50%) * var(--fit-x)).
+    const design = routeData.camera.design_aspect;
+    document.documentElement.style.setProperty('--fit-x', String(Math.min(1, design / aspect)));
+    document.documentElement.style.setProperty('--fit-y', String(Math.min(1, aspect / design)));
     renderer.setPixelRatio(Math.min(devicePixelRatio, quality));
     renderer.setSize(width, height, false);
     size = { width, height, pixelScale: height * renderer.getPixelRatio() / (2 * tanV) };

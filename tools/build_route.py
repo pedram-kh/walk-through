@@ -29,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from flow_common import make_current
 
 ROOT = Path(__file__).resolve().parent.parent
-STOPS = ['01-hero', '02-clients']          # route order
+STOPS = ['01-hero', '02-clients', '03-problem']   # route order
 SAMPLES = 240                              # camera samples per segment
 SPACER_SCREENS = 2.0                       # scroll length of each journey's spacer, in screen heights
 MIN_CLEARANCE = 0.8                        # closest the camera may pass to any object (tiles lift ~0.3 on hover)
@@ -40,6 +40,7 @@ JOURNEY = {
     'offset': (0.7, -0.9),    # ...and this far right and below the centre of view, clear of the lens
     'times': (0.42, 0.55, 0.68, 0.8, 0.9),   # journey points it passes in front of the camera
     'end': (1.6, -1.4, -7.0), # if the next stop has no current: fade out here, in its camera frame
+    'lead': 1.5,              # straight run-in to the next stop's current
     'density': 300,           # particles per unit of length
     'width': 0.196, 'fibres': 34, 'speed': 0.48, 'twist': 9.0, 'samples': 200,
     'color': ('#a4a4aa', '#e2e2e6'), 'radius': 0.0055,
@@ -119,10 +120,16 @@ def journey_current(index, from_stop, to_stop, positions, rotations):
     tail = stop_current(from_stop)
     control = [tail[int(0.92 * (len(tail) - 1))], tail[-1]]      # overlap the tail so the hand-over is seamless
     dx, dy = JOURNEY['offset']
+    head = stop_current(to_stop)
+    hidden_head = head and not in_view(positions[-1], rotations[-1], head[0])   # that current starts off screen
     for t in JOURNEY['times']:
         p, r = sample_at(positions, rotations, t)
-        control.append(p + r @ Vector((dx, dy, -JOURNEY['ahead'])))
-    head = stop_current(to_stop)
+        point = p + r @ Vector((dx, dy, -JOURNEY['ahead']))
+        if hidden_head and in_view(positions[-1], rotations[-1], point, margin=1.15):
+            continue                                            # keep the arrival view as the stop composed it
+        control.append(point)
+    if hidden_head:                                             # come in along the next stop's current, off screen
+        control.append(head[0] + (head[0] - head[1]).normalized() * JOURNEY['lead'])
     if head:                                                    # overlap the next stop's current
         control += [head[0], head[int(0.08 * (len(head) - 1))]]
     else:
@@ -195,17 +202,18 @@ for index, stop_id in enumerate(STOPS):
 # (should be ~0, so the approved composition is untouched) and during the journey.
 tan_h = math.tan(math.radians(route['camera']['horizontal_fov_deg']) / 2)
 tan_v = tan_h / route['camera']['design_aspect']
-def in_view(p, r, w):
+def in_view(p, r, w, margin=1.0):
     v = r.inverted() @ (w - p)
-    return v.z < -0.3 and abs(v.x / -v.z) < tan_h and abs(v.y / -v.z) < tan_v
+    return v.z < -0.3 and abs(v.x / -v.z) < tan_h * margin and abs(v.y / -v.z) < tan_v * margin
 for k, (seg, (positions, rotations)) in enumerate(zip(route['segments'], raw_segments)):
     seg['current'], line = journey_current(k, route['stops'][k], route['stops'][k + 1], positions, rotations)
     rest_seen = sum(in_view(positions[0], rotations[0], w) for w in line) / len(line)
+    arrival_seen = sum(in_view(positions[-1], rotations[-1], w) for w in line) / len(line)
     report = []
     for t in (0.3, 0.4, 0.5, 0.6, 0.7):
         p, r = sample_at(positions, rotations, t)
         report.append(f"{t:.0%} {sum(in_view(p, r, w) for w in line) / len(line):.0%}")
-    print(f"  current {seg['current']['file']}: {seg['current']['count']} particles; seen from the rest view: {rest_seen:.0%}; "
+    print(f"  current {seg['current']['file']}: {seg['current']['count']} particles; seen from the rest view: {rest_seen:.0%}, from the arrival view: {arrival_seen:.0%}; "
           f"share in view during the journey: {', '.join(report)}")
 
 # Clearance: the closest any camera sample comes to the objects of the stops it joins.

@@ -77,7 +77,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--teal); outline-
 /* ---- Section 02, clients: the logo grid is 3D; the label sits above its top-left corner ---- */
 .eyebrow { margin: 0; font: 12px/1 "Geist Mono", ui-monospace, Menlo, monospace; font-weight: 400; letter-spacing: .06em;
   text-transform: uppercase; color: #ffffff80; }
-.s-clients .eyebrow { position: absolute; left: 10%; top: calc(39.7% - 34px); }
+/* Text that lines up with 3D objects follows the 3D view's scale (--fit-x/y, set by the runtime). */
+.s-clients .eyebrow { position: absolute; left: calc(50% + (10% - 50%) * var(--fit-x, 1)); top: calc(50% + (39.7% - 50%) * var(--fit-y, 1) - 34px); }
 /* The brand names: real text for screen readers and search; visible only on the flat page. */
 .brand-list { margin: 0; padding: 0; list-style: none; }
 .route .brand-list { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -85,6 +86,26 @@ html:not(.route) .brand-list { position: absolute; left: 10%; right: 10%; top: 4
   grid-template-columns: repeat(5, 1fr); gap: 0; font-size: 20px; color: #ffffffb8; text-align: center; }
 html:not(.route) .brand-list li { padding: 24px 8px; border: 1px solid #ffffff14; }
 html:not(.route) .s-clients { background-image: none; }     /* the list is the grid on the flat page */
+
+/* ---- Section 03, the problem: the card rows are 3D; all text is HTML around them ---- */
+.s-problem { --left: clamp(16px, 6vw, 120px); }
+.problem-label { position: absolute; left: var(--left); top: 9%; }
+.problem-title { position: absolute; left: var(--left); top: calc(9% + 22px); margin: 0; font-weight: 300;
+  font-size: clamp(30px, 3.9vw, 72px); line-height: 1; letter-spacing: -.02em; text-transform: uppercase; }
+.problem-title span { display: block; }
+.problem-title .dim { color: #ffffff80; }
+.problem-rows { margin: 0; padding: 0; list-style: none; }
+.problem-rows li { position: absolute; left: var(--left); right: clamp(12px, 1.5vw, 28px);
+  top: calc(50% + (var(--row-y) - 50%) * var(--fit-y, 1)); transform: translateY(-50%);
+  display: flex; align-items: center; gap: 16px; font-weight: 300; font-size: clamp(18px, 1.6vw, 30px); text-transform: uppercase; }
+.problem-rows .num { font: 12px/1 "Geist Mono", ui-monospace, Menlo, monospace; color: #ffffff80; }
+.problem-rows .rule { width: 32px; height: 1px; background: #ffffff40; }
+.problem-rows .arrow { margin-left: auto; color: #ffffff80; display: flex; }
+.problem-copy { position: absolute; left: var(--left); top: 89.5%; max-width: 34em; margin: 0;
+  font-size: clamp(14px, 1vw, 18px); line-height: 1.6; color: #ffffffb8; }
+.problem-equation { position: absolute; right: 7%; top: 89.5%; margin: 0; font-weight: 300; white-space: nowrap;
+  font-size: clamp(18px, 1.5vw, 28px); line-height: 1.35; }      /* one line, right edge on the cards' right edge */
+.problem-equation .eq { color: #75d3dd; }      /* oklch(0.8 0.12 200), the landing page's teal */
 
 /* ---- Page-level controls ---- */
 .route-dots { position: fixed; z-index: 3; left: clamp(6px, 1.2vw, 22px); top: 50%; transform: translateY(-50%);
@@ -108,4 +129,7 @@ html:not(.route) .s-clients { background-image: none; }     /* the list is the g
   .s-clients .eyebrow { left: 16px; top: 22%; }
   html:not(.route) .brand-list { left: 16px; right: 16px; top: calc(22% + 32px); grid-template-columns: repeat(2, 1fr); font-size: 17px; }
   html:not(.route) .brand-list li { padding: 18px 8px; }
+  .problem-rows .arrow, .problem-rows .rule { display: none; }
+  .problem-equation { left: var(--left); right: auto; top: auto; bottom: 4%; white-space: normal; }
+  .problem-copy { top: auto; bottom: 16%; right: var(--left); }
 }
