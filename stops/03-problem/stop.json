@@ -23,54 +23,70 @@
   "travel": 8.0
  },
  "brief": {
-  "status": "answers recorded 2026-10-04; graybox awaiting approval",
-  "text": "All HTML: '02 \u2014 The problem' label, 'AI moves fast. / Your creative needs to keep up.', the three row labels (01 New features., 02 New use cases., 03 New competitors.) with direction arrows, the paragraph and 'More creative = More learnings = More opportunities to scale.' The whole section fits one viewport.",
+  "status": "approved 2026-10-04",
+  "text": "All HTML (no section label, removed at your request): 'AI moves fast. / Your creative needs to keep up.', the three row labels (01 New features., 02 New use cases., 03 New competitors.) with direction arrows, the paragraph and 'More creative = More learnings = More opportunities to scale.' The whole section fits one viewport.",
   "buttons": "none (the row arrows only show direction)",
   "button_behaviour": "n/a",
   "scene_behaviour": "Three rows of cards drift sideways forever like the landing HTML (rows 1 and 3 right at 30 px/s, row 2 left at 34 px/s, faded at the row ends). Cards stand upright, turned 25 degrees on their vertical axes, toward / away from the screen in a checkerboard. Cards near the cursor tilt and lift like the hero tiles; the current parts around the cursor (same at every stop). Arrives frozen and black and white; colour and motion once live.",
   "current": "Enters from the right, splits into two strands that go around the card block (one above, one below and up the left side) and both leave through the top of the screen.",
-  "media": "Photos from catalyst-growth.com (the set downloaded for stop 01) on the cards, with the landing HTML's coloured glow (violet, blue, teal), diagonal hatching, hairline border and label chip.",
+  "media": "Photos from catalyst-growth.com (the set downloaded for stop 01) on the cards, with the landing HTML's hairline border and label chip (the landing's coloured placeholder sits under the photo, so it never shows).",
   "transition_in": "tilt left, same move as before (half circle radius 8, 60 degrees, travel 8)"
  },
- "colors": {
-  "card": [
-   0.0021,
-   0.0021,
-   0.0031
-  ],
-  "chip": [
-   0.48,
-   0.48,
-   0.48
+ "card": {
+  "width": 1.5411,
+  "height": 1.1372,
+  "zigzag_deg": 25,
+  "atlas": "cards.jpg",
+  "atlas_size": [
+   3072,
+   1146
   ]
  },
  "rows": [
   {
    "row": 0,
    "y": 0.4,
+   "centre": [
+    0.0,
+    0.76578,
+    0.0
+   ],
    "speed_cards_per_s": 0.1119,
    "left": -2.1214,
    "right": 6.0814,
    "pitch": 1.6654,
-   "cards": 5
+   "on_screen": 5,
+   "loop": 6
   },
   {
    "row": 1,
    "y": 0.575,
+   "centre": [
+    0.0,
+    -0.57433,
+    -0.0
+   ],
    "speed_cards_per_s": -0.1269,
    "left": -2.1214,
    "right": 6.0814,
    "pitch": 1.6654,
-   "cards": 5
+   "on_screen": 5,
+   "loop": 6
   },
   {
    "row": 2,
    "y": 0.75,
+   "centre": [
+    0.0,
+    -1.91445,
+    -0.0
+   ],
    "speed_cards_per_s": 0.1119,
    "left": -2.1214,
    "right": 6.0814,
    "pitch": 1.6654,
-   "cards": 5
+   "on_screen": 5,
+   "loop": 6
   }
  ],
  "cards": [
@@ -79,210 +95,342 @@
    "row": 0,
    "index": 0,
    "label": "UGC",
+   "photo": "images/hero.jpg",
+   "uv": [
+    0.0026,
+    0.67365,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     -1.35086,
     0.76578,
     0.0
    ],
-   "turn_deg": 25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": 25
   },
   {
    "name": "Card_01",
    "row": 0,
    "index": 1,
    "label": "STILL",
+   "photo": "images/ugc.jpg",
+   "uv": [
+    0.16927,
+    0.67365,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     0.31457,
     0.76578,
     0.0
    ],
-   "turn_deg": -25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": -25
   },
   {
    "name": "Card_02",
    "row": 0,
    "index": 2,
    "label": "STATIC",
+   "photo": "images/portrait.jpg",
+   "uv": [
+    0.33594,
+    0.67365,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     1.98,
     0.76578,
     0.0
    ],
-   "turn_deg": 25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": 25
   },
   {
    "name": "Card_03",
    "row": 0,
    "index": 3,
    "label": "CREATOR",
+   "photo": "images/far_left.jpg",
+   "uv": [
+    0.5026,
+    0.67365,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     3.64543,
     0.76578,
     0.0
    ],
-   "turn_deg": -25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": -25
   },
   {
    "name": "Card_04",
    "row": 0,
    "index": 4,
    "label": "MOTION",
+   "photo": "images/texture.jpg",
+   "uv": [
+    0.66927,
+    0.67365,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     5.31086,
     0.76578,
     0.0
    ],
-   "turn_deg": 25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": 25
+  },
+  {
+   "name": "Card_05",
+   "row": 0,
+   "index": 5,
+   "label": "HI-FI",
+   "photo": "images/behind_hero.jpg",
+   "uv": [
+    0.83594,
+    0.67365,
+    0.16146,
+    0.31937
+   ],
+   "centre": [
+    6.97629,
+    0.76578,
+    0.0
+   ],
+   "turn_deg": -25
   },
   {
    "name": "Card_10",
    "row": 1,
    "index": 0,
-   "label": "STATIC",
+   "label": "MOTION",
+   "photo": "images/top_violet.jpg",
+   "uv": [
+    0.0026,
+    0.34031,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     -1.35086,
     -0.57433,
     -0.0
    ],
-   "turn_deg": -25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": -25
   },
   {
    "name": "Card_11",
    "row": 1,
    "index": 1,
-   "label": "CREATOR",
+   "label": "HI-FI",
+   "photo": "images/landscape.jpg",
+   "uv": [
+    0.16927,
+    0.34031,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     0.31457,
     -0.57433,
     -0.0
    ],
-   "turn_deg": 25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": 25
   },
   {
    "name": "Card_12",
    "row": 1,
    "index": 2,
-   "label": "MOTION",
+   "label": "UGC",
+   "photo": "images/right_blue.jpg",
+   "uv": [
+    0.33594,
+    0.34031,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     1.98,
     -0.57433,
     -0.0
    ],
-   "turn_deg": -25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": -25
   },
   {
    "name": "Card_13",
    "row": 1,
    "index": 3,
-   "label": "HI-FI",
+   "label": "STILL",
+   "photo": "images/statement.jpg",
+   "uv": [
+    0.5026,
+    0.34031,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     3.64543,
     -0.57433,
     -0.0
    ],
-   "turn_deg": 25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": 25
   },
   {
    "name": "Card_14",
    "row": 1,
    "index": 4,
-   "label": "UGC",
+   "label": "STATIC",
+   "photo": "images/side_strip.jpg",
+   "uv": [
+    0.66927,
+    0.34031,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     5.31086,
     -0.57433,
     -0.0
    ],
-   "turn_deg": -25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": -25
+  },
+  {
+   "name": "Card_15",
+   "row": 1,
+   "index": 5,
+   "label": "CREATOR",
+   "photo": "images/card.jpg",
+   "uv": [
+    0.83594,
+    0.34031,
+    0.16146,
+    0.31937
+   ],
+   "centre": [
+    6.97629,
+    -0.57433,
+    -0.0
+   ],
+   "turn_deg": 25
   },
   {
    "name": "Card_20",
    "row": 2,
    "index": 0,
-   "label": "MOTION",
+   "label": "STATIC",
+   "photo": "images/product.jpg",
+   "uv": [
+    0.0026,
+    0.00698,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     -1.35086,
     -1.91445,
     -0.0
    ],
-   "turn_deg": 25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": 25
   },
   {
    "name": "Card_21",
    "row": 2,
    "index": 1,
-   "label": "HI-FI",
+   "label": "CREATOR",
+   "photo": "images/mid_violet.jpg",
+   "uv": [
+    0.16927,
+    0.00698,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     0.31457,
     -1.91445,
     -0.0
    ],
-   "turn_deg": -25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": -25
   },
   {
    "name": "Card_22",
    "row": 2,
    "index": 2,
-   "label": "UGC",
+   "label": "MOTION",
+   "photo": "images/splash.jpg",
+   "uv": [
+    0.33594,
+    0.00698,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     1.98,
     -1.91445,
     -0.0
    ],
-   "turn_deg": 25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": 25
   },
   {
    "name": "Card_23",
    "row": 2,
    "index": 3,
-   "label": "STILL",
+   "label": "HI-FI",
+   "photo": "images/right_teal.jpg",
+   "uv": [
+    0.5026,
+    0.00698,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     3.64543,
     -1.91445,
     -0.0
    ],
-   "turn_deg": -25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": -25
   },
   {
    "name": "Card_24",
    "row": 2,
    "index": 4,
-   "label": "STATIC",
+   "label": "UGC",
+   "photo": "images/floor_teal.jpg",
+   "uv": [
+    0.66927,
+    0.00698,
+    0.16146,
+    0.31937
+   ],
    "centre": [
     5.31086,
     -1.91445,
     -0.0
    ],
-   "turn_deg": 25,
-   "width": 1.5411,
-   "height": 1.1372
+   "turn_deg": 25
+  },
+  {
+   "name": "Card_25",
+   "row": 2,
+   "index": 5,
+   "label": "STILL",
+   "photo": "images/floor_streak.jpg",
+   "uv": [
+    0.83594,
+    0.00698,
+    0.16146,
+    0.31937
+   ],
+   "centre": [
+    6.97629,
+    -1.91445,
+    -0.0
+   ],
+   "turn_deg": -25
   }
  ],
  "flow": {

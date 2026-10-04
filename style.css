@@ -89,7 +89,6 @@ html:not(.route) .s-clients { background-image: none; }     /* the list is the g
 
 /* ---- Section 03, the problem: the card rows are 3D; all text is HTML around them ---- */
 .s-problem { --left: clamp(16px, 6vw, 120px); }
-.problem-label { position: absolute; left: var(--left); top: 9%; }
 .problem-title { position: absolute; left: var(--left); top: calc(9% + 22px); margin: 0; font-weight: 300;
   font-size: clamp(30px, 3.9vw, 72px); line-height: 1; letter-spacing: -.02em; text-transform: uppercase; }
 .problem-title span { display: block; }

@@ -1,0 +1,225 @@
+{
+ "file": "cards.jpg",
+ "size": [
+  3072,
+  1146
+ ],
+ "cells": [
+  {
+   "row": 0,
+   "index": 0,
+   "label": "UGC",
+   "photo": "images/hero.jpg",
+   "uv": [
+    0.0026,
+    0.67365,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 0,
+   "index": 1,
+   "label": "STILL",
+   "photo": "images/ugc.jpg",
+   "uv": [
+    0.16927,
+    0.67365,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 0,
+   "index": 2,
+   "label": "STATIC",
+   "photo": "images/portrait.jpg",
+   "uv": [
+    0.33594,
+    0.67365,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 0,
+   "index": 3,
+   "label": "CREATOR",
+   "photo": "images/far_left.jpg",
+   "uv": [
+    0.5026,
+    0.67365,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 0,
+   "index": 4,
+   "label": "MOTION",
+   "photo": "images/texture.jpg",
+   "uv": [
+    0.66927,
+    0.67365,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 0,
+   "index": 5,
+   "label": "HI-FI",
+   "photo": "images/behind_hero.jpg",
+   "uv": [
+    0.83594,
+    0.67365,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 1,
+   "index": 0,
+   "label": "MOTION",
+   "photo": "images/top_violet.jpg",
+   "uv": [
+    0.0026,
+    0.34031,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 1,
+   "index": 1,
+   "label": "HI-FI",
+   "photo": "images/landscape.jpg",
+   "uv": [
+    0.16927,
+    0.34031,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 1,
+   "index": 2,
+   "label": "UGC",
+   "photo": "images/right_blue.jpg",
+   "uv": [
+    0.33594,
+    0.34031,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 1,
+   "index": 3,
+   "label": "STILL",
+   "photo": "images/statement.jpg",
+   "uv": [
+    0.5026,
+    0.34031,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 1,
+   "index": 4,
+   "label": "STATIC",
+   "photo": "images/side_strip.jpg",
+   "uv": [
+    0.66927,
+    0.34031,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 1,
+   "index": 5,
+   "label": "CREATOR",
+   "photo": "images/card.jpg",
+   "uv": [
+    0.83594,
+    0.34031,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 2,
+   "index": 0,
+   "label": "STATIC",
+   "photo": "images/product.jpg",
+   "uv": [
+    0.0026,
+    0.00698,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 2,
+   "index": 1,
+   "label": "CREATOR",
+   "photo": "images/mid_violet.jpg",
+   "uv": [
+    0.16927,
+    0.00698,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 2,
+   "index": 2,
+   "label": "MOTION",
+   "photo": "images/splash.jpg",
+   "uv": [
+    0.33594,
+    0.00698,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 2,
+   "index": 3,
+   "label": "HI-FI",
+   "photo": "images/right_teal.jpg",
+   "uv": [
+    0.5026,
+    0.00698,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 2,
+   "index": 4,
+   "label": "UGC",
+   "photo": "images/floor_teal.jpg",
+   "uv": [
+    0.66927,
+    0.00698,
+    0.16146,
+    0.31937
+   ]
+  },
+  {
+   "row": 2,
+   "index": 5,
+   "label": "STILL",
+   "photo": "images/floor_streak.jpg",
+   "uv": [
+    0.83594,
+    0.00698,
+    0.16146,
+    0.31937
+   ]
+  }
+ ]
+}
