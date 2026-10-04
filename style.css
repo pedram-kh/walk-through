@@ -39,9 +39,6 @@ html:not(.route) .section { background: var(--ink) var(--poster) center / cover 
 .spacer { display: none; }
 .route .spacer { display: block; height: calc(var(--screens, 3) * 100svh); }
 
-.grid-lines { position: absolute; inset: 0; display: flex; justify-content: space-between; padding: 0 var(--gutter); }
-.grid-lines i { width: 1px; background: linear-gradient(180deg, #ffffff12, #ffffff08 70%, #ffffff00); }
-
 /* Top bar, matched to catalyst-growth.com: 5rem tall, a centred 90rem container with
    a 0.75-1rem side margin, the logo on the left and the menu icon on the right.
    Fixed: it stays on screen through the whole route. */
@@ -71,8 +68,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--teal); outline-
   letter-spacing: -.03em; text-transform: uppercase; text-shadow: 0 0 40px #02020499; }
 .lede h1 span { display: block; }
 .lede p { margin: 0 0 40px; font-size: clamp(15px, 1.1vw, 18px); line-height: 1.45; color: #d6d5de; }
-.pillars { position: absolute; left: clamp(16px, 4vw, 68px); bottom: 48px; margin: 0; padding: 0; list-style: none;
-  display: grid; gap: 10px; font-size: 11px; letter-spacing: .55em; text-transform: uppercase; color: #c9c8d6; }
 
 /* ---- Section 02, clients: the logo grid is 3D; the label sits above its top-left corner ---- */
 .eyebrow { margin: 0; font: 12px/1 "Geist Mono", ui-monospace, Menlo, monospace; font-weight: 400; letter-spacing: .06em;
@@ -145,7 +140,6 @@ html:not(.route) .s-clients { background-image: none; }     /* the list is the g
   .lede { top: 16%; right: var(--gutter); max-width: none; }
   .lede p br { display: none; }
   .s-hero::before { background: linear-gradient(180deg, #020204d9 0%, #02020499 55%, #02020400 85%); }
-  .pillars { display: none; }
   .s-clients .eyebrow { left: 16px; top: 22%; }
   html:not(.route) .brand-list { left: 16px; right: 16px; top: calc(22% + 32px); grid-template-columns: repeat(2, 1fr); font-size: 17px; }
   html:not(.route) .brand-list li { padding: 18px 8px; }

@@ -1,11 +1,12 @@
-// Stop 01, hero: the tile wall, galaxy dust, particle current and videos from the
-// Blender export (stop.glb, dust.bin, flow.bin, stop.json). Blender owns the layout;
+// Stop 01, hero: the tile wall, particle current and videos from the Blender export
+// (stop.glb, flow.bin, stop.json). The galaxy dust in dust.bin is not drawn: the current is
+// the only particles at this stop (your request, 2026-10-05). Blender owns the layout;
 // this module owns the motion. The route runtime owns the renderer, camera and scroll,
 // and drives this stop through the stop interface (see PLAN.md).
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GREY_GLSL, addGrey } from '../../runtime/materials.js';
-import { DUST_VERTEX, POINT_FRAGMENT, createCurrent } from '../../runtime/flow.js';
+import { createCurrent } from '../../runtime/flow.js';
 
 const CONFIG = {
   // Real photos: tile label -> image URL (relative to this stop's folder).
@@ -29,7 +30,7 @@ const CONFIG = {
   videos: Object.fromEntries(['hero', 'portrait', 'product'].map(label =>
     [label, { src: `media/videos/${label}.mp4`, poster: `media/videos/${label}-poster.jpg` }])),
   tile: { reach: 0.55, tilt: 0.32, lift: 0.3, stiffness: 55, damping: 11 },
-  dust: { radius: 1.25, push: 0.6, swirl: 0.45, trail: 0.35, sizeBoost: 1.9, drift: 0.035 },
+  current: { radius: 1.25, push: 0.6, swirl: 0.45, trail: 0.35, sizeBoost: 1.9, drift: 0.035 },
   parallax: 0.045,
 };
 
@@ -78,9 +79,8 @@ export async function load(ctx) {
     if (!response.ok) throw Error('Missing stop 01 asset: ' + url);
     return response[kind]();
   };
-  const [contract, gltf, dustBuffer, flowBuffer] = await Promise.all([
-    fetchAs(at('stop.json'), 'json'), new GLTFLoader().loadAsync(at('stop.glb')),
-    fetchAs(at('dust.bin'), 'arrayBuffer'), fetchAs(at('flow.bin'), 'arrayBuffer'),
+  const [contract, gltf, flowBuffer] = await Promise.all([
+    fetchAs(at('stop.json'), 'json'), new GLTFLoader().loadAsync(at('stop.glb')), fetchAs(at('flow.bin'), 'arrayBuffer'),
   ]);
   const palette = Object.fromEntries(Object.entries(contract.palette_linear).map(([k, v]) => [k, new THREE.Color().setRGB(...v)]));
   const { camera } = ctx;
@@ -172,52 +172,18 @@ export async function load(ctx) {
   });
   root.updateMatrixWorld(true);
 
-  // ---- Dust: points owned by a tile ride on it; the rest float free ----------
-  const raw = new Float32Array(dustBuffer), stride = contract.dust.floats_per_point;
-  if (raw.length !== contract.dust.count * stride) throw Error('dust.bin does not match stop.json');
-  const buckets = new Map();
-  for (let i = 0; i < contract.dust.count; i++) {
-    const owner = Math.round(raw[i * stride + 7]);
-    if (!buckets.has(owner)) buckets.set(owner, []);
-    buckets.get(owner).push(i);
-  }
-  const dustUniforms = {
+  // ---- Cursor and time uniforms for the current -------------------------------
+  const pointerUniforms = {
     uTime: time, uScale: { value: 1 }, uActive: { value: 0 },
-    uRadius: { value: CONFIG.dust.radius }, uPush: { value: CONFIG.dust.push }, uSwirl: { value: CONFIG.dust.swirl },
-    uTrail: { value: CONFIG.dust.trail }, uSizeBoost: { value: CONFIG.dust.sizeBoost }, uDrift: { value: CONFIG.dust.drift },
+    uRadius: { value: CONFIG.current.radius }, uPush: { value: CONFIG.current.push }, uSwirl: { value: CONFIG.current.swirl },
+    uTrail: { value: CONFIG.current.trail }, uSizeBoost: { value: CONFIG.current.sizeBoost }, uDrift: { value: CONFIG.current.drift },
     uRayO: { value: new THREE.Vector3() }, uRayD: { value: new THREE.Vector3(0, 0, -1) },
     uTrailO: { value: new THREE.Vector3() }, uTrailD: { value: new THREE.Vector3(0, 0, -1) },
   };
-  const dustMaterial = new THREE.ShaderMaterial({
-    uniforms: dustUniforms, vertexShader: DUST_VERTEX, fragmentShader: POINT_FRAGMENT,
-    blending: THREE.AdditiveBlending, depthWrite: false, transparent: true,
-  });
   const point = new THREE.Vector3(), inverse = new THREE.Matrix4();
-  for (const [owner, indices] of buckets) {
-    const parent = owner >= 0 ? tiles[owner].pivot : root;
-    inverse.copy(parent.matrixWorld).invert();
-    const positions = new Float32Array(indices.length * 3), colors = new Float32Array(indices.length * 3);
-    const sizes = new Float32Array(indices.length), seeds = new Float32Array(indices.length);
-    indices.forEach((source, n) => {
-      const k = source * stride;
-      point.set(raw[k], raw[k + 1], raw[k + 2]).applyMatrix4(inverse).toArray(positions, n * 3);
-      colors.set([raw[k + 3], raw[k + 4], raw[k + 5]], n * 3);
-      sizes[n] = raw[k + 6];
-      seeds[n] = (Math.sin(source * 12.9898) * 43758.5453) % 1;
-      if (seeds[n] < 0) seeds[n] += 1;
-    });
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
-    geometry.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1));
-    const points = new THREE.Points(geometry, dustMaterial);
-    points.frustumCulled = false;
-    parent.add(points);
-  }
 
   // ---- Current: particles flowing along the paths in stop.json ------------------
-  const current = createCurrent(contract.flow, flowBuffer, dustUniforms);
+  const current = createCurrent(contract.flow, flowBuffer, pointerUniforms);
   root.add(current.points);
   cleanup.push(() => current.dispose());
 
@@ -249,15 +215,15 @@ export async function load(ctx) {
     time.value += dt;
     fast.lerp(target, 1 - Math.exp(-dt * 10));
     slow.lerp(target, 1 - Math.exp(-dt * 2.2));
-    const presence = dustUniforms.uActive;
+    const presence = pointerUniforms.uActive;
     presence.value += ((pointer.inside ? 1 : 0) - presence.value) * (1 - Math.exp(-dt * (pointer.inside ? 6 : 2)));
 
     root.rotation.set(-fast.y * CONFIG.parallax * presence.value, fast.x * CONFIG.parallax * presence.value, 0);
     group.updateMatrixWorld(true);
     raycaster.setFromCamera(fast, camera);
     trailCaster.setFromCamera(slow, camera);
-    dustUniforms.uRayO.value.copy(raycaster.ray.origin); dustUniforms.uRayD.value.copy(raycaster.ray.direction);
-    dustUniforms.uTrailO.value.copy(trailCaster.ray.origin); dustUniforms.uTrailD.value.copy(trailCaster.ray.direction);
+    pointerUniforms.uRayO.value.copy(raycaster.ray.origin); pointerUniforms.uRayD.value.copy(raycaster.ray.direction);
+    pointerUniforms.uTrailO.value.copy(trailCaster.ray.origin); pointerUniforms.uTrailD.value.copy(trailCaster.ray.direction);
 
     const { reach, tilt: tiltAmount, lift, stiffness, damping } = CONFIG.tile;
     for (let i = 0; i < count; i++) {
@@ -295,7 +261,7 @@ export async function load(ctx) {
 
   return {
     group,
-    counts: { tiles: count, dust: contract.dust.count, flow: contract.flow.count, videos: clips.length },
+    counts: { tiles: count, flow: contract.flow.count, videos: clips.length },
     // Frozen: the clock stops and videos pause; the scene keeps its last pose.
     setFrozen(value) {
       if (disposed || value === frozen) return;
@@ -312,7 +278,7 @@ export async function load(ctx) {
     },
     resize({ width, height, pixelScale }) {
       stageW = width; stageH = height; aspect = width / height;
-      dustUniforms.uScale.value = pixelScale;
+      pointerUniforms.uScale.value = pixelScale;
     },
     // Called every rendered frame while visible. Returns true while it animates.
     update(dt) {
