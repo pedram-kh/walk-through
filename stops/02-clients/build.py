@@ -103,8 +103,8 @@ FLOW = {'particles': 7000, 'width': 0.196, 'fibres': 34, 'speed': 0.48, 'twist':
         'color': ('#a4a4aa', '#e2e2e6')}
 PARTICLE_RADIUS = 0.0055     # current particle size, as at stop 01
 
-CELL_COLOR = (0.006, 0.006, 0.008)
-LINE_COLOR = (0.07, 0.07, 0.075)
+CELL_COLOR = (0.00061, 0.00061, 0.00121)   # the page's black, like the live site's cells (linear)
+LINE_COLOR = (0.00719, 0.00719, 0.00719)   # white at 8% over black, the live site's hairlines (linear)
 WORD_COLOR = (0.48, 0.48, 0.48)     # white at 72%, like the landing HTML (linear)
 
 

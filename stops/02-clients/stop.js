@@ -11,7 +11,7 @@ import { GREY_GLSL } from '../../runtime/materials.js';
 import { createCurrent } from '../../runtime/flow.js';
 
 const CONFIG = {
-  lift: 0.35,                 // how far the hovered cell rises toward the camera (scene units)
+  lift: 0.15,                 // how far the hovered cell rises toward the camera (scene units)
   spring: { stiffness: 60, damping: 12 },
   fade: { in: 0.18, out: 0.35 },      // hover light time constants (s), like the site's 0.5 s / 0.75 s fades
   turnSeconds: 2,             // the border gradient's rotation while hovered (the site's 2 s)
@@ -23,6 +23,7 @@ const CONFIG = {
 // The site's gradient: violet hsl(280,41%,43%), blue hsl(208,34%,50%), teal hsl(177,100%,30%),
 // as a conic sweep violet-blue-teal-blue-teal-violet.
 const GRADIENT_GLSL = /* glsl */`
+const vec3 VIOLET_SRGB = vec3(0.4888, 0.2537, 0.6063);   // the glow is blended in screen colours, like CSS
 const vec3 VIOLET = vec3(0.2038, 0.0524, 0.3259);
 const vec3 BLUE = vec3(0.0890, 0.2247, 0.4064);
 const vec3 TEAL = vec3(0.0000, 0.3185, 0.2846);
@@ -53,7 +54,9 @@ varying vec2 vUv; varying vec3 vLocal; varying float vCell;
 ${GREY_GLSL}
 ${GRADIENT_GLSL}`;
 
-// Cell panel: dark, with the violet glow from the top-left corner when hovered.
+// Cell panel: the page's black, with the violet glow from the top-left corner when hovered.
+// Like the site's radial-gradient(circle at 0% 0%, violet 40% -> transparent): the alpha falls
+// off linearly to the far corner and blends over black in sRGB, then converts to linear.
 const CELL_FRAGMENT = /* glsl */`
 uniform vec3 uBase; uniform float uGlow;
 ${HOVER_UNIFORMS}
@@ -61,7 +64,8 @@ void main() {
   int c = int(vCell + 0.5);
   vec2 size = uSize[c];
   float fromCorner = length(vUv * size) / length(size);       // uv (0,0) is the cell's top-left corner
-  vec3 col = uBase + VIOLET * uGlow * (1.0 - clamp(fromCorner, 0.0, 1.0)) * uHover[c];
+  float alpha = uGlow * (1.0 - clamp(fromCorner, 0.0, 1.0)) * uHover[c];
+  vec3 col = uBase + pow(VIOLET_SRGB * alpha, vec3(2.2));
   gl_FragColor = vec4(toGrey(col), 1.0);
   #include <colorspace_fragment>
 }`;
