@@ -141,10 +141,6 @@ html:not(.route) .s-clients { background-image: none; }     /* the list is the g
 .route-dots button.hold::before { width: 8px; height: 38px; border-radius: 99px; transform: none; border-color: #ffffffb3;
   background: linear-gradient(180deg, var(--paper) calc(var(--fill, 0) * 100%), #000 0); }
 
-.pause { position: fixed; z-index: 3; right: 24px; bottom: 24px; padding: 10px 14px; font: inherit; font-size: 12px;
-  letter-spacing: .08em; color: #c9c8d6; background: transparent; border: 1px solid #ffffff33; border-radius: 99px; cursor: pointer; }
-.pause:hover { color: var(--paper); border-color: var(--violet); }
-
 @media (max-width: 760px) {
   .lede { top: 16%; right: var(--gutter); max-width: none; }
   .lede p br { display: none; }

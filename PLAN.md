@@ -127,7 +127,7 @@ Scrolling back plays them in reverse.
 ```
 index.html              flat page: fixed nav, every section in order, spacers between them
 style.css               page, section and route styles (html.route = 3D mode)
-app.js                  chooses 3D route or flat page (touch, reduced motion, failure); Pause button
+app.js                  chooses 3D route or flat page (touch, reduced motion, failure)
 route.json              built by tools/build_route.py from the stops' stop.json files
 assets/                 page-level files (logo)
 runtime/
@@ -304,3 +304,4 @@ in the world, so stops never overlap.
 | 2026-10-05 | all | Currents 40% less dense at your request: runtime/flow.js draws a fixed, even 60% of every current's particles (CURRENT_DENSITY 0.6), stops and journeys alike; paths unchanged, no rebuilds. Points on screen at the hero 45,013 -> 27,045. Approved | not measured | not measured | |
 | 2026-10-05 | 01 | Mono tiles restyled at your request, after catalyst-growth.com's photos: soft muted black and white (cool blue-grey lights, deep blacks) under a halftone screen, teal / violet fringes where shadow meets light, faint coloured grain in the blacks. Halftone anti-aliased and faded where it would cause moire; grain in screen pixels. The 8 colour tiles are unchanged; the poster still shows the old look. Approved | not measured | not measured | |
 | 2026-10-05 | all | Hold zones at your request: each section is wrapped in a hold element half a screen taller than the screen (section sticky inside), so every stop stays live and in colour for an extra half screen of scrolling; the stop's dot becomes a pill that fills violet -> teal through it, then the curtain and journey start. Colour starts fading in over the last 20% of a journey into a stop (direction-aware). Inside a hold zone, wheel / trackpad scrolling is braked (x0.55, max 8% of a screen per event; touch left native). Scroll snapping removed (it would pull the page back out of a hold zone). Dots fly to the start of a hold zone. Page 12 screens for 4 stops (was 10). Then: the pill is black, filling white (not the gradient), and no single wheel step can carry the page into a zone past its edge, so every arrival from above starts with an empty pill. Approved | not measured | not measured | |
+| 2026-10-05 | all | Pause motion button removed at your request (visitors with reduced motion set still get the flat page). Approved | not measured | not measured | |
