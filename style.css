@@ -8,8 +8,7 @@ html, body { margin: 0; background: var(--ink); color: var(--paper); font-family
    html.route        3D walk-through (set by app.js on capable devices)
    html.route-ready  stop 01 is live: the canvas replaces the poster
    no class          the flat page: sections show their stop posters, no spacers   */
-html.route { scroll-snap-type: y proximity; }       /* helps scrolling settle on a section */
-html.route.flying { scroll-snap-type: none; }       /* the dots fly without snapping */
+/* No scroll snapping in 3D mode: it would pull the page back out of a stop's hold zone. */
 
 /* ---- 3D layers, pinned behind the page ---- */
 .stage { position: fixed; inset: 0; z-index: 0; display: none; }
@@ -34,7 +33,10 @@ main { position: relative; z-index: 2; }
 .section { position: relative; height: 100svh; min-height: 480px; overflow: hidden; pointer-events: none;
   --gutter: clamp(16px, 10vw, 172px); }
 .section a, .section button { pointer-events: auto; }
-.route .section { scroll-snap-align: start; }
+/* Hold zone: in 3D mode each section stays on screen (sticky) for an extra half screen of
+   scrolling; the stop is live and in colour there, and the dot becomes a filling pill. */
+.route .hold { height: calc(100svh + var(--hold, .5) * 100svh); }
+.route .hold > .section { position: sticky; top: 0; }
 html:not(.route) .section { background: var(--ink) var(--poster) center / cover no-repeat; }
 .spacer { display: none; }
 .route .spacer { display: block; height: calc(var(--screens, 3) * 100svh); }
@@ -131,6 +133,13 @@ html:not(.route) .s-clients { background-image: none; }     /* the list is the g
   transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .route-dots button:hover::before { border-color: var(--paper); }
 .route-dots button[aria-current]::before { background: var(--paper); border-color: var(--paper); transform: scale(1.3); }
+/* At a stop's hold zone the current dot stretches into a pill: black, filling white from the
+   top as the visitor scrolls through it (--fill, set by the runtime); when full, the journey begins. */
+.route-dots button { transition: height .3s ease; }
+.route-dots button::before { transition: background .2s ease, border-color .2s ease, transform .2s ease, width .3s ease, height .3s ease, border-radius .3s ease; }
+.route-dots button.hold { height: 46px; }
+.route-dots button.hold::before { width: 8px; height: 38px; border-radius: 99px; transform: none; border-color: #ffffffb3;
+  background: linear-gradient(180deg, var(--paper) calc(var(--fill, 0) * 100%), #000 0); }
 
 .pause { position: fixed; z-index: 3; right: 24px; bottom: 24px; padding: 10px 14px; font: inherit; font-size: 12px;
   letter-spacing: .08em; color: #c9c8d6; background: transparent; border: 1px solid #ffffff33; border-radius: 99px; cursor: pointer; }

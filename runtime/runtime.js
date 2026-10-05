@@ -11,6 +11,8 @@ import { createCurrent, stillPointerUniforms } from './flow.js';
 const MAX_PIXEL_RATIO = 1.5;
 const GREY_SECONDS = 0.5;          // colour <-> black and white fade
 const FOLLOW_SECONDS = 0.12;       // the camera glides toward the scroll position (smooths wheel steps)
+const LANDING = 0.2;               // colour starts fading in over the last 20% of a journey into a stop
+const BRAKE = 0.55, BRAKE_CAP = 0.08;   // in a hold zone: wheel scrolling x0.55, at most 8% of a screen per event
 
 export async function startRoute({ stage, overlay, isPaused, onFailure }) {
   const routeData = await fetch('route.json').then(r => { if (!r.ok) throw Error('Missing route.json'); return r.json(); });
@@ -29,7 +31,7 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
     target.addEventListener(type, fn, options);
     cleanup.push(() => target.removeEventListener(type, fn, options));
   };
-  let followY = scrollY;
+  let followY = scrollY, heading = 1;
   let disposed = false, raf = 0, dirty = true, size = { width: 1, height: 1, pixelScale: 1 }, quality = MAX_PIXEL_RATIO;
 
   const loader = new StopLoader({
@@ -103,6 +105,22 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
   }, { passive: true });
   listen(document.documentElement, 'pointerleave', () => { pointer.inside = false; });
   listen(window, 'scroll', () => { dirty = true; }, { passive: true });
+  // The brake: inside a stop's hold zone, wheel and trackpad scrolling is slowed and a hard
+  // flick is capped, so the live view is hard to skip; and no single wheel step can carry the
+  // page into a zone past its edge, so every arrival starts at the zone's edge (an empty pill
+  // from above). Other wheel steps scroll natively. Touch scrolling is left native.
+  listen(window, 'wheel', e => {
+    if (e.ctrlKey || document.documentElement.classList.contains('flying')) return;
+    const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? innerHeight : 1;
+    let delta = e.deltaY * unit;
+    const inZone = route.holdAt(scrollY) >= 0;
+    if (inZone) delta = Math.max(-BRAKE_CAP * innerHeight, Math.min(BRAKE_CAP * innerHeight, delta * BRAKE));
+    const edge = route.entryBetween(scrollY, scrollY + delta);
+    if (edge !== null) delta = edge - scrollY;
+    else if (!inZone) return;                         // nothing to change: native scrolling
+    e.preventDefault();
+    scrollBy(0, delta);
+  }, { passive: false });
   listen(canvas, 'webglcontextlost', e => { e.preventDefault(); fail(Error('Graphics context lost')); });
 
   // Stop 01 first: nothing is shown until it is ready.
@@ -124,10 +142,18 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
     const wall = (now - last) / 1000, dt = Math.min(wall, 0.05);
     last = now;
     const gap = scrollY - followY;
+    if (Math.abs(gap) >= 0.5) heading = Math.sign(gap);      // which way the visitor is scrolling
     followY = Math.abs(gap) < 0.5 ? scrollY : followY + gap * (1 - Math.exp(-dt / FOLLOW_SECONDS));
     if (followY !== scrollY) dirty = true;
     const state = route.at(followY, pose);
     dots.setCurrent(state.stop);
+    dots.setHold(state.rest, state.hold);
+    // Landing: the stop the camera is arriving at starts turning colour before it settles.
+    let landing = -1, landingColour = 0;
+    if (state.phase === 'travel') {          // only the stop being travelled toward
+      landing = heading > 0 ? state.segment + 1 : state.segment;
+      landingColour = 1 - Math.min(1, (heading > 0 ? 1 - state.progress : state.progress) / LANDING);
+    }
     loader.focus(state.stop);
     const paused = isPaused() || document.hidden;
 
@@ -149,7 +175,7 @@ export async function startRoute({ stage, overlay, isPaused, onFailure }) {
       // Live only at rest under the camera; frozen everywhere else (and while paused).
       const live = i === state.rest && !paused;
       if (slot.frozen === live) { slot.frozen = !live; slot.module.setFrozen(!live); dirty = true; }
-      const target = live ? 0 : 1;
+      const target = live ? 0 : i === landing && !paused ? 1 - landingColour : 1;
       if (slot.grey !== target) {
         slot.grey = target > slot.grey ? Math.min(target, slot.grey + dt / GREY_SECONDS) : Math.max(target, slot.grey - dt / GREY_SECONDS);
         slot.module.setGrey(slot.grey);

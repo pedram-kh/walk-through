@@ -34,7 +34,7 @@ export async function runBench() {
   });
 
   console.info('Bench: running (keep this tab in front and the mouse still)...');
-  document.documentElement.classList.add('flying');           // no snapping while gliding
+  document.documentElement.classList.add('flying');           // no scroll brake while gliding
   scrollTo(0, 0);
   await wait(1);
   requestAnimationFrame(sample);

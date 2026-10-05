@@ -29,56 +29,66 @@
 </header>
 
 <!-- The flat page: the real content, one section per stop. In 3D mode it scrolls over
-     the scene like a curtain; the empty spacers between sections are the camera journeys. -->
+     the scene like a curtain; each section's hold wrapper keeps it on screen for an extra
+     half screen of scrolling (the stop is live there), and the empty spacers between
+     sections are the camera journeys. -->
 <main id="page">
-  <section class="section s-hero" id="s01" data-title="Hero" aria-labelledby="hero-title"
-           style="--poster: url('stops/01-hero/poster.jpg')">
-    <div class="lede">
-      <h1 id="hero-title"><span>Full-funnel creative</span> <span>for AI brands</span> <span>that scale.</span></h1>
-      <p>From UGC and Design to Hi-Fi and Motion,<br> we make high-performing ads for complex AI products.</p>
-      <a class="pill" href="https://www.catalyst-growth.com/contact">Let’s talk</a>
-    </div>
-  </section>
+  <div class="hold">
+    <section class="section s-hero" id="s01" data-title="Hero" aria-labelledby="hero-title"
+             style="--poster: url('stops/01-hero/poster.jpg')">
+      <div class="lede">
+        <h1 id="hero-title"><span>Full-funnel creative</span> <span>for AI brands</span> <span>that scale.</span></h1>
+        <p>From UGC and Design to Hi-Fi and Motion,<br> we make high-performing ads for complex AI products.</p>
+        <a class="pill" href="https://www.catalyst-growth.com/contact">Let’s talk</a>
+      </div>
+    </section>
+  </div>
 
   <div class="spacer" id="t01" aria-hidden="true"></div>
 
-  <section class="section s-clients" id="s02" data-title="Creative for" aria-labelledby="s02-title"
-           style="--poster: url('stops/02-clients/poster.jpg')">
-    <h2 class="eyebrow" id="s02-title">Creative for</h2>
-    <ul class="brand-list">
-      <li>Perplexity</li><li>Granola</li><li>Lovable</li><li>Fyxer</li><li>Magic AI</li>
-      <li>Mozart</li><li>Cleo</li><li>Viktor</li><li>Jack &amp; Jill</li><li>Canva</li>
-    </ul>
-  </section>
+  <div class="hold">
+    <section class="section s-clients" id="s02" data-title="Creative for" aria-labelledby="s02-title"
+             style="--poster: url('stops/02-clients/poster.jpg')">
+      <h2 class="eyebrow" id="s02-title">Creative for</h2>
+      <ul class="brand-list">
+        <li>Perplexity</li><li>Granola</li><li>Lovable</li><li>Fyxer</li><li>Magic AI</li>
+        <li>Mozart</li><li>Cleo</li><li>Viktor</li><li>Jack &amp; Jill</li><li>Canva</li>
+      </ul>
+    </section>
+  </div>
 
   <div class="spacer" id="t02" aria-hidden="true"></div>
 
-  <section class="section s-problem" id="s03" data-title="The problem" aria-labelledby="s03-title"
-           style="--poster: url('stops/03-problem/poster.jpg')">
-    <h2 class="problem-title" id="s03-title"><span>AI moves fast.</span> <span class="dim">Your creative needs to keep up.</span></h2>
-    <ol class="problem-rows">
-      <li style="--row-y: 40%"><span class="num">01</span><span class="rule" aria-hidden="true"></span>New features.<span class="arrow"><svg width="44" height="10" viewBox="0 0 44 10" aria-hidden="true"><path d="M0 5h42M38 1l4 4-4 4" fill="none" stroke="currentColor"/></svg></span></li>
-      <li style="--row-y: 57.5%"><span class="num">02</span><span class="rule" aria-hidden="true"></span>New use cases.<span class="arrow"><svg width="44" height="10" viewBox="0 0 44 10" aria-hidden="true"><path d="M44 5H2M6 1L2 5l4 4" fill="none" stroke="currentColor"/></svg></span></li>
-      <li style="--row-y: 75%"><span class="num">03</span><span class="rule" aria-hidden="true"></span>New competitors.<span class="arrow"><svg width="44" height="10" viewBox="0 0 44 10" aria-hidden="true"><path d="M0 5h42M38 1l4 4-4 4" fill="none" stroke="currentColor"/></svg></span></li>
-    </ol>
-    <p class="problem-copy">We build and test creative at speed, using performance data to find what works and iterate on it.</p>
-    <p class="problem-equation">More creative <span class="eq">=</span> More learnings <span class="eq">=</span> More opportunities to scale.</p>
-  </section>
+  <div class="hold">
+    <section class="section s-problem" id="s03" data-title="The problem" aria-labelledby="s03-title"
+             style="--poster: url('stops/03-problem/poster.jpg')">
+      <h2 class="problem-title" id="s03-title"><span>AI moves fast.</span> <span class="dim">Your creative needs to keep up.</span></h2>
+      <ol class="problem-rows">
+        <li style="--row-y: 40%"><span class="num">01</span><span class="rule" aria-hidden="true"></span>New features.<span class="arrow"><svg width="44" height="10" viewBox="0 0 44 10" aria-hidden="true"><path d="M0 5h42M38 1l4 4-4 4" fill="none" stroke="currentColor"/></svg></span></li>
+        <li style="--row-y: 57.5%"><span class="num">02</span><span class="rule" aria-hidden="true"></span>New use cases.<span class="arrow"><svg width="44" height="10" viewBox="0 0 44 10" aria-hidden="true"><path d="M44 5H2M6 1L2 5l4 4" fill="none" stroke="currentColor"/></svg></span></li>
+        <li style="--row-y: 75%"><span class="num">03</span><span class="rule" aria-hidden="true"></span>New competitors.<span class="arrow"><svg width="44" height="10" viewBox="0 0 44 10" aria-hidden="true"><path d="M0 5h42M38 1l4 4-4 4" fill="none" stroke="currentColor"/></svg></span></li>
+      </ol>
+      <p class="problem-copy">We build and test creative at speed, using performance data to find what works and iterate on it.</p>
+      <p class="problem-equation">More creative <span class="eq">=</span> More learnings <span class="eq">=</span> More opportunities to scale.</p>
+    </section>
+  </div>
 
   <div class="spacer" id="t03" aria-hidden="true"></div>
 
-  <section class="section s-cycle" id="s04" data-title="Creative cycle" aria-labelledby="s04-title"
-           style="--poster: url('stops/04-cycle/poster.jpg')">
-    <div class="cycle-list">
-      <h2 class="cycle-title" id="s04-title">Creative cycle</h2>
-      <ol class="cycle-rows">
-        <li><button type="button" data-stage="0" aria-current="true"><span class="num">01</span><span class="name">Strategy.</span></button></li>
-        <li><button type="button" data-stage="1"><span class="num">02</span><span class="name">Testing.</span></button></li>
-        <li><button type="button" data-stage="2"><span class="num">03</span><span class="name">Iteration.</span></button></li>
-        <li><button type="button" data-stage="3"><span class="num">04</span><span class="name">Scale.</span></button></li>
-      </ol>
-    </div>
-  </section>
+  <div class="hold">
+    <section class="section s-cycle" id="s04" data-title="Creative cycle" aria-labelledby="s04-title"
+             style="--poster: url('stops/04-cycle/poster.jpg')">
+      <div class="cycle-list">
+        <h2 class="cycle-title" id="s04-title">Creative cycle</h2>
+        <ol class="cycle-rows">
+          <li><button type="button" data-stage="0" aria-current="true"><span class="num">01</span><span class="name">Strategy.</span></button></li>
+          <li><button type="button" data-stage="1"><span class="num">02</span><span class="name">Testing.</span></button></li>
+          <li><button type="button" data-stage="2"><span class="num">03</span><span class="name">Iteration.</span></button></li>
+          <li><button type="button" data-stage="3"><span class="num">04</span><span class="name">Scale.</span></button></li>
+        </ol>
+      </div>
+    </section>
+  </div>
 </main>
 
 <button class="pause" id="pause" type="button" aria-pressed="false" hidden>Pause motion</button>
